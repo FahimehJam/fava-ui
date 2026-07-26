@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>داشبورد مدیریت - سامانه معاونت فاوا</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Bootstrap 5 RTL CSS -->
+  <link rel="stylesheet" href="css/bootstrap.rtl.min.css">
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="css/all.min.css">
+  <!-- Google Font (Vazir) -->
+  <link href="css/font-face.css" rel="stylesheet" type="text/css" />
+
+  <style>
+
+    /* --- پالت رنگی شما --- */
+    :root {
+      --deep-twilight: #03045e;
+      --bright-teal-blue: #0077b6;
+      --turquoise-surf: #00b4d8;
+      --frosted-blue: #90e0ef;
+      --light-cyan: #caf0f8;
+
+      --primary-color: var(--bright-teal-blue);
+      --bg-light: #f4f8fb;
+      --text-dark: #1f2937;
+      --text-light: #6b7280;
+
+      --border-radius: 16px;
+      --shadow: 0 0.15rem 1.5rem 0 rgba(3, 4, 94, 0.06);
+
+      --sidebar-width: 250px;
+      --sidebar-collapsed-width: 80px;
+      --transition-speed: 0.3s;
+    }
+
+    body {
+      font-family: 'Vazir', sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-dark);
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      height: 100vh;
+    }
+
+    /* --- ساختار Grid --- */
+    .app-layout {
+      display: grid;
+      grid-template-columns: var(--sidebar-collapsed-width) 1fr;
+      min-height: 100vh;
+      width: 100%;
+      transition: grid-template-columns var(--transition-speed);
+    }
+
+    .app-layout.sidebar-open {
+      grid-template-columns: var(--sidebar-width) 1fr;
+    }
+
+    /* --- Sidebar --- */
+    .sidebar {
+      background-color: var(--deep-twilight);
+      padding: 20px 10px;
+      border-left: 1px solid rgba(255, 255, 255, 0.05);
+      overflow-y: auto;
+      overflow-x: hidden;
+      white-space: nowrap;
+      box-shadow: 2px 0 15px rgba(3, 4, 94, 0.15);
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      transition: width var(--transition-speed), padding var(--transition-speed);
+      width: var(--sidebar-collapsed-width);
+    }
+
+    .app-layout.sidebar-open .sidebar {
+      width: var(--sidebar-width);
+      padding: 20px 15px;
+    }
+
+    .app-layout.sidebar-open .main-content-wrapper {
+      padding-right: 20px;
+    }
+
+    /* --- Sidebar Content --- */
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      margin-bottom: 30px;
+      padding: 0 5px;
+      overflow: hidden;
+      height: 60px;
+    }
+    .brand-info {
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+    .brand-info i {
+      font-size: 24px;
+      color: var(--light-cyan);
+      margin-left: 10px;
+      min-width: 24px;
+    }
+    .sidebar-brand-text {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+      transition: opacity var(--transition-speed);
+    }
+    .app-layout.sidebar-open .sidebar-brand-text {
+      opacity: 1;
+      width: auto;
+    }
+    .sidebar-brand h5 { font-weight: 700; margin: 0; font-size: 16px; color: #fff; line-height: 1.2; }
+    .sidebar-brand small { font-size: 10px; color: var(--light-cyan); }
+
+    .nav-link {
+      color: rgba(255, 255, 255, 0.7);
+      padding: 12px 15px;
+      border-radius: 12px;
+      margin-bottom: 5px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .nav-link:hover, .nav-link.active {
+      background-color: var(--bright-teal-blue);
+      color: #fff;
+    }
+    .nav-link i {
+      min-width: 24px;
+      margin-left: 10px;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 18px;
+      text-align: center;
+    }
+    .nav-link.active i, .nav-link:hover i { color: #fff; }
+
+    .nav-link .link-text {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+      transition: opacity var(--transition-speed);
+    }
+    .app-layout.sidebar-open .nav-link .link-text {
+      opacity: 1;
+      width: auto;
+    }
+
+    .nav-link.dropdown-toggle::after {
+      display: inline-block;
+      margin-right: auto;
+      margin-left: 0;
+      transition: transform 0.3s ease;
+      content: "\f107";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      border: none;
+      vertical-align: 0;
+      font-size: 12px;
+      opacity: 0;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .app-layout.sidebar-open .nav-link.dropdown-toggle::after {
+      opacity: 1;
+    }
+    .nav-link.dropdown-toggle.show::after {
+      transform: rotate(180deg);
+    }
+
+    /* --- زیرمنوها --- */
+    .submenu {
+      padding-right: 15px;
+      list-style: none;
+      padding-left: 0;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+    }
+    .submenu.collapse:not(.show) { display: block !important; }
+    .submenu.collapse.show { max-height: 500px; opacity: 1; }
+    .app-layout.sidebar-open .submenu.collapse.show { display: block; }
+    .submenu .nav-link { font-size: 13px; padding: 8px 15px; padding-right: 20px; color: rgba(255, 255, 255, 0.6); }
+    .submenu .nav-link:hover { color: #fff; background-color: rgba(0, 119, 182, 0.3); }
+    .submenu .nav-link i { font-size: 14px; min-width: 20px; margin-left: 10px; }
+
+    /* --- Main Content --- */
+    .main-content-wrapper {
+      padding: 20px 30px;
+      background-color: var(--bg-light);
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 100vh;
+      transition: padding-right var(--transition-speed);
+    }
+
+    /* --- Topbar --- */
+    .topbar {
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      padding: 0 25px;
+      border-radius: var(--border-radius);
+      margin-bottom: 25px;
+      box-shadow: var(--shadow);
+    }
+
+    .topbar-date-row {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      padding: 5px 0;
+      border-bottom: 1px solid #f3f4f6;
+      color: var(--text-light);
+    }
+    .topbar-date-row span, .topbar-date-row small { font-size: 10px; margin-right: 10px; }
+    .topbar-date-row i { font-size: 10px; margin-left: 4px; }
+
+    .topbar-main-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .topbar-toggle-btn {
+      background: transparent;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      color: var(--text-dark);
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .topbar-toggle-btn:hover {
+      background: var(--bg-light);
+      border-color: var(--bright-teal-blue);
+      color: var(--bright-teal-blue);
+    }
+
+    .topbar-title-right {
+      padding-right: 15px;
+      text-align: right;
+      flex-grow: 0;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .topbar-title-right h5 { margin: 0; font-weight: 700; font-size: 16px; color: var(--deep-twilight); }
+    .topbar-title-right small { color: var(--text-light); font-size: 11px; }
+
+    .user-profile { display: flex; align-items: center; gap: 15px; }
+    .user-profile img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+    .user-profile .info { text-align: left; direction: ltr; }
+    .user-profile h6 { margin: 0; font-size: 14px; font-weight: 700; }
+    .user-profile small { font-size: 11px; color: var(--text-light); }
+
+    /* --- Cards --- */
+    .stat-card {
+      border-radius: var(--border-radius);
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(3, 4, 94, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 100%;
+      color: #fff;
+      transition: transform 0.3s ease;
+    }
+    .stat-card:hover { transform: translateY(-4px); }
+
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      background: rgba(255, 255, 255, 0.25);
+      color: #fff;
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-text h3 { font-weight: 700; margin: 0; font-size: 24px; color: #fff; }
+    .stat-text p { margin: 0; font-size: 13px; color: rgba(255, 255, 255, 0.85); }
+    .stat-change { font-size: 11px; margin-top: 5px; display: block; color: rgba(255, 255, 255, 0.9); }
+
+    .stat-card.card-1 { background: linear-gradient(145deg, var(--deep-twilight), var(--bright-teal-blue)); }
+    .stat-card.card-2 { background: linear-gradient(145deg, var(--bright-teal-blue), var(--turquoise-surf)); }
+    .stat-card.card-3 { background: linear-gradient(145deg, var(--turquoise-surf), var(--frosted-blue)); }
+    .stat-card.card-4 { background: linear-gradient(145deg, var(--frosted-blue), var(--light-cyan)); color: var(--deep-twilight); }
+    .stat-card.card-4 .stat-text h3 { color: var(--deep-twilight); }
+    .stat-card.card-4 .stat-text p { color: var(--deep-twilight); }
+    .stat-card.card-4 .stat-change { color: var(--deep-twilight); }
+    .stat-card.card-4 .stat-icon { background: rgba(3, 4, 94, 0.15); color: var(--deep-twilight); border-color: rgba(3, 4, 94, 0.1); }
+
+    /* --- بخش‌ها --- */
+    .section-card {
+      background: #fff;
+      border-radius: var(--border-radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      height: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #f3f4f6;
+      padding-bottom: 15px;
+    }
+    .section-header h6 { font-weight: 700; margin: 0; font-size: 15px; color: var(--deep-twilight); }
+    .section-header a { font-size: 12px; color: var(--bright-teal-blue); text-decoration: none; font-weight: 600; }
+
+    /* --- Project Table --- */
+    .table-custom { font-size: 13px; margin-bottom: 0; }
+    .table-custom th { font-weight: 600; color: var(--text-light); border-bottom: 2px solid var(--bright-teal-blue); }
+    .table-custom td { vertical-align: middle; border-bottom: 1px solid #f3f4f6; padding: 12px 10px; }
+    .table-custom tbody tr:nth-child(even) { background-color: rgba(202, 240, 248, 0.2); }
+    .table-custom tbody tr:hover { background-color: rgba(0, 119, 182, 0.05); }
+
+    .status-badge {
+      padding: 2px 12px;
+      border-radius: 50px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .status-badge.in-progress { background: #dbeafe; color: var(--bright-teal-blue); border: 1px solid rgba(0, 119, 182, 0.2); }
+    .status-badge.done { background: #d1fae5; color: #059669; border: 1px solid rgba(5, 150, 105, 0.2); }
+    .status-badge.pending { background: #fef3c7; color: #d97706; border: 1px solid rgba(217, 119, 6, 0.2); }
+
+    .progress-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .progress-custom {
+      height: 6px;
+      border-radius: 10px;
+      background: #e5e7eb;
+      width: 70px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .progress-custom .progress-bar {
+      border-radius: 10px;
+      height: 100%;
+    }
+    .progress-custom .progress-bar.bg-primary { background: linear-gradient(90deg, var(--bright-teal-blue), var(--turquoise-surf)); }
+    .progress-custom .progress-bar.bg-success { background: linear-gradient(90deg, #10b981, #34d399); }
+    .progress-custom .progress-bar.bg-warning { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .progress-text { font-size: 11px; font-weight: 600; color: var(--text-dark); width: 25px; text-align: left; }
+
+    /* --- Donut Chart --- */
+    .donut-container { position: relative; height: 200px; width: 100%; margin-top: -10px;}
+    .chart-legend { list-style: none; padding: 0; font-size: 12px; margin-top: 10px; }
+    .chart-legend li { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: 500; }
+    .chart-legend li span:first-child::before { content: "●"; margin-left: 5px; font-size: 10px; }
+
+    /* --- بخش برنامه و بودجه --- */
+    .budget-section { display: flex; flex-direction: column; gap: 20px; }
+    .budget-chart-container { display: flex; flex-direction: column; gap: 20px; padding: 10px 5px; }
+
+    .budget-bar-row {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 10px 8px;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      cursor: default;
+    }
+
+    .budget-bar-row:hover { background: rgba(202, 240, 248, 0.3); padding: 10px 15px; }
+
+    .budget-bar-row .label {
+      min-width: 150px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .budget-bar-row .label i { font-size: 15px; width: 22px; color: var(--bright-teal-blue); }
+
+    .budget-bar-row .bar-track {
+      flex-grow: 1;
+      height: 14px;
+      background: #e5e7eb;
+      border-radius: 10px;
+      overflow: visible;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+      position: relative;
+      cursor: pointer;
+    }
+
+    .budget-bar-row .bar-track .fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      min-width: 0;
+      box-shadow: 0 2px 8px rgba(0, 119, 182, 0.2);
+    }
+
+    .budget-bar-row .bar-track .fill.twilight { background: linear-gradient(90deg, #03045e, #0077b6); }
+    .budget-bar-row .bar-track .fill.blue { background: linear-gradient(90deg, #0077b6, #00b4d8); }
+    .budget-bar-row .bar-track .fill.teal { background: linear-gradient(90deg, #00b4d8, #90e0ef); }
+
+    .budget-bar-row .value {
+      min-width: 55px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-dark);
+      text-align: left;
+      direction: ltr;
+    }
+
+    /* ===== تولتیپ شناور ===== */
+    .bar-tooltip {
+      position: fixed;
+      background: linear-gradient(135deg, #03045e, #0077b6);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 1000;
+      box-shadow: 0 6px 20px rgba(3, 4, 94, 0.35);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform: translateY(-8px) scale(0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      letter-spacing: 0.3px;
+    }
+
+    .bar-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 7px solid transparent;
+      border-top-color: #0077b6;
+    }
+
+    .bar-tooltip.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+
+    .bar-tooltip .tooltip-icon { margin-left: 8px; font-size: 13px; }
+
+    /* ===== جدول بودجه ===== */
+    .budget-table-wrapper {
+      background: var(--bg-light);
+      border-radius: 12px;
+      padding: 15px;
+      height: 100%;
+    }
+    .budget-table-custom th {
+      font-weight: 700;
+      color: var(--text-light);
+      border-bottom: 2px solid #e5e7eb;
+      font-size: 12px;
+      padding: 10px;
+    }
+    .budget-table-custom td {
+      vertical-align: middle;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 13px;
+      padding: 14px 10px;
+    }
+    .budget-table-custom tr:last-child td { border-bottom: none; }
+    .budget-badge {
+      padding: 2px 12px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .budget-badge.high { background: #d1fae5; color: #059669; border: 1px solid rgba(5, 150, 105, 0.2); }
+    .budget-badge.medium { background: #fef3c7; color: #d97706; border: 1px solid rgba(217, 119, 6, 0.2); }
+    .budget-badge.low { background: #fee2e2; color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.2); }
+
+    /* --- بخش: دفترچه تلفن --- */
+    .phonebook-section { padding: 5px 0; }
+
+    .phonebook-search-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .phonebook-search-wrapper .input-group-custom {
+      position: relative;
+      flex-grow: 1;
+    }
+    .phonebook-search-wrapper .input-group-custom input {
+      width: 100%;
+      padding: 6px 15px 6px 35px;
+      border: 1px solid #e5e7eb;
+      border-radius: 50px;
+      background: var(--bg-light);
+      font-size: 13px;
+      outline: none;
+      transition: 0.3s;
+    }
+    .phonebook-search-wrapper .input-group-custom input:focus {
+      border-color: var(--bright-teal-blue);
+      box-shadow: 0 0 0 0.2rem rgba(0, 119, 182, 0.1);
+    }
+    .phonebook-search-wrapper .input-group-custom i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+    }
+
+    .phonebook-table-custom {
+      width: 100%;
+      font-size: 12px;
+      margin-bottom: 0;
+    }
+    .phonebook-table-custom th {
+      font-weight: 600;
+      color: var(--text-light);
+      border-bottom: 2px solid var(--bright-teal-blue);
+      padding: 8px 5px;
+      text-align: center;
+    }
+    .phonebook-table-custom td {
+      vertical-align: middle;
+      border-bottom: 1px solid #f3f4f6;
+      padding: 8px 5px;
+      text-align: center;
+    }
+    .phonebook-table-custom tbody tr:nth-child(even) { background-color: rgba(202, 240, 248, 0.2); }
+    .phonebook-table-custom tbody tr:hover { background-color: rgba(0, 119, 182, 0.05); }
+    .phonebook-table-custom tr:last-child td { border-bottom: none; }
+
+    .row-number {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      text-align: center;
+      border-radius: 4px;
+      background: var(--bg-light);
+      color: var(--text-dark);
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    /* --- Pagination --- */
+    .pagination-custom {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #f3f4f6;
+    }
+    .page-btn {
+      background: transparent;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 12px;
+      color: var(--text-dark);
+      transition: 0.2s;
+    }
+    .page-btn:hover:not(.disabled) {
+      background: var(--light-cyan);
+      border-color: var(--bright-teal-blue);
+      color: var(--bright-teal-blue);
+    }
+    .page-btn.active {
+      background: var(--bright-teal-blue);
+      border-color: var(--bright-teal-blue);
+      color: #fff;
+    }
+    .page-btn.disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* --- Calendar & Notification --- */
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; font-size: 12px; direction: ltr; }
+    .calendar-grid .day { padding: 4px 0; border-radius: 5px; cursor: pointer; }
+    .calendar-grid .day.active { background: var(--bright-teal-blue); color: #fff; box-shadow: 0 2px 8px rgba(0, 119, 182, 0.3); }
+    .calendar-grid .day.other-month { color: #e5e7eb; }
+
+    .meeting-list { margin-top: 15px; border-top: 1px solid #f3f4f6; padding-top: 10px; }
+    .meeting-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed #f3f4f6; font-size: 12px; }
+    .meeting-item:last-child { border-bottom: none; }
+    .meeting-info { display: flex; align-items: center; gap: 8px; }
+    .meeting-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; box-shadow: 0 0 4px rgba(0,0,0,0.05); }
+    .meeting-dot.blue { background: var(--bright-teal-blue); }
+    .meeting-dot.purple { background: var(--deep-twilight); }
+    .meeting-time { color: var(--text-light); font-size: 10px; font-weight: 600; }
+
+    /* --- Notification --- */
+    .notification-item { display: flex; gap: 10px; margin-bottom: 12px; font-size: 12px; align-items: flex-start; padding: 8px 10px; border-radius: 8px; transition: 0.2s; }
+    .notification-item:last-child { margin-bottom: 0; }
+    .notification-item:hover { background: var(--bg-light); }
+    .notification-item i { margin-top: 2px; font-size: 14px; width: 20px; text-align: center; }
+    .notification-item i.check { color: #10b981; }
+    .notification-item i.warn { color: #f59e0b; }
+    .notification-item i.info { color: var(--bright-teal-blue); }
+    .notification-item p { margin: 0; line-height: 1.4; font-weight: 500; color: var(--text-dark); }
+    .notification-item small { color: var(--text-light); }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .app-layout { display: block; }
+      .app-layout.sidebar-open { display: grid; grid-template-columns: 250px 1fr; }
+
+      .sidebar {
+        position: fixed;
+        top: 0;
+        right: -260px;
+        width: 260px;
+        height: 100vh;
+        z-index: 1050;
+        padding: 20px 15px;
+        transition: right 0.3s ease;
+        box-shadow: -5px 0 15px rgba(3, 4, 94, 0.15);
+      }
+      .app-layout.sidebar-open .sidebar { right: 0; width: 260px; }
+
+      .sidebar .nav-link .link-text, .sidebar .sidebar-brand-text { opacity: 1; width: auto; overflow: visible; }
+      .sidebar .submenu.collapse.show { display: block; }
+      .sidebar .nav-link.dropdown-toggle::after { opacity: 1; }
+      .main-content-wrapper { padding: 15px; }
+      .app-layout.sidebar-open .main-content-wrapper { padding-right: 0; }
+
+      .topbar-main-row { flex-direction: column-reverse; align-items: stretch; text-align: right; }
+      .topbar-title-right { padding-right: 0; text-align: right; margin-bottom: 10px; justify-content: flex-end; }
+      .user-profile { justify-content: flex-start; }
+      .phonebook-search-wrapper { flex-direction: column; align-items: stretch; }
+
+      .budget-bar-row { flex-wrap: wrap; gap: 10px; }
+      .budget-bar-row .label { min-width: 100%; font-size: 12px; }
+      .budget-bar-row .bar-track { height: 12px; }
+      .budget-bar-row .value { min-width: 45px; font-size: 12px; }
+    }
+
+    @media (max-width: 576px) {
+      .stat-card { padding: 15px; }
+      .stat-text h3 { font-size: 20px; }
+      .stat-icon { width: 40px; height: 40px; font-size: 16px; }
+      .budget-bar-row .label { font-size: 11px; }
+      .budget-table-custom td, .budget-table-custom th { font-size: 11px; padding: 8px 5px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Main Layout Grid -->
+<div class="app-layout" id="appLayout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-info">
+        <i class="fas fa-layer-group"></i>
+        <div class="sidebar-brand-text">
+          <h5>سامانه معاونت فاوا</h5>
+          <small>دانشگاه علوم پزشکی</small>
+        </div>
+      </div>
+    </div>
+
+    <ul class="nav flex-column">
+      <!-- صفحه اصلی -->
+      <li class="nav-item">
+        <a class="nav-link active" href="index.html">
+          <i class="fas fa-home"></i> <span class="link-text">صفحه اصلی</span>
+        </a>
+      </li>
+
+      <!-- 1. اطلاعات پایه -->
+      <li class="nav-item">
+        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#baseSubmenu" aria-expanded="false">
+          <i class="fas fa-database"></i> <span class="link-text">اطلاعات پایه</span>
+        </a>
+        <ul class="submenu collapse" id="baseSubmenu">
+          <li><a class="nav-link" href="center_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست مراکز</span></a></li>
+          <li><a class="nav-link" href="deputy_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست معاونت‌ها</span></a></li>
+          <li><a class="nav-link" href="section_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست بخش‌ها</span></a></li>
+          <li><a class="nav-link" href="physical_location_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست محل‌های فیزیکی</span></a></li>
+          <li><a class="nav-link" href="equipment_type_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست نوع تجهیزات</span></a></li>
+          <li><a class="nav-link" href="equipment_model_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست مدل تجهیزات</span></a></li>
+          <li><a class="nav-link" href="network_type_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست انواع شبکه</span></a></li>
+          <li><a class="nav-link" href="measurement_unit_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">واحدهای اندازه‌گیری</span></a></li>
+          <li><a class="nav-link" href="product_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست کالا</span></a></li>
+        </ul>
+      </li>
+
+      <!-- 2. منابع انسانی -->
+      <li class="nav-item">
+        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#hrSubmenu" aria-expanded="false">
+          <i class="fas fa-users"></i> <span class="link-text">منابع انسانی</span>
+        </a>
+        <ul class="submenu collapse" id="hrSubmenu">
+          <li>
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#personnelSubmenu" aria-expanded="false">
+              <i class="fas fa-chevron-left"></i> <span class="link-text">لیست پرسنل</span>
+            </a>
+            <ul class="submenu collapse" id="personnelSubmenu">
+              <li><a class="nav-link" href="forms/personnel.html"><i class="fas fa-chevron-left"></i> <span class="link-text">پرسنل جدید</span></a></li>
+              <li><a class="nav-link" href="forms/personnel.html"><i class="fas fa-chevron-left"></i> <span class="link-text">مشاهده پرسنل</span></a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+
+      <!-- 3. شرکت‌ها -->
+      <li class="nav-item">
+        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#companiesSubmenu" aria-expanded="false">
+          <i class="fas fa-building"></i> <span class="link-text">شرکت‌ها</span>
+        </a>
+        <ul class="submenu collapse" id="companiesSubmenu">
+          <li><a class="nav-link" href="forms/company.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست شرکت‌ها</span></a></li>
+        </ul>
+      </li>
+
+      <!-- 4. قراردادها -->
+      <li class="nav-item">
+        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#contractsSubmenu" aria-expanded="false">
+          <i class="fas fa-file-signature"></i> <span class="link-text">قراردادها</span>
+        </a>
+        <ul class="submenu collapse" id="contractsSubmenu">
+          <li><a class="nav-link" href="forms/contract.html"><i class="fas fa-chevron-left"></i> <span class="link-text">صدور قرارداد جدید</span></a></li>
+        </ul>
+      </li>
+
+      <!-- 5. پروژه‌ها -->
+      <li class="nav-item">
+        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#projectSubmenu" aria-expanded="false">
+          <i class="fas fa-folder-open"></i> <span class="link-text">پروژه‌ها</span>
+        </a>
+        <ul class="submenu collapse" id="projectSubmenu">
+          <li><a class="nav-link" href="forms/project.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست پروژه‌ها</span></a></li>
+        </ul>
+      </li>
+
+      <!-- 6. سامانه‌ها -->
+      <li class="nav-item">
+        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#systemSubmenu" aria-expanded="false">
+          <i class="fas fa-laptop"></i> <span class="link-text">سامانه‌ها</span>
+        </a>
+        <ul class="submenu collapse" id="systemSubmenu">
+          <li><a class="nav-link" href="forms/system.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست سامانه‌ها</span></a></li>
+        </ul>
+      </li>
+
+      <!-- 7. تجهیزات -->
+      <li class="nav-item">
+        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#equipSubmenu" aria-expanded="false">
+          <i class="fas fa-microchip"></i> <span class="link-text">تجهیزات</span>
+        </a>
+        <ul class="submenu collapse" id="equipSubmenu">
+          <li><a class="nav-link" href="forms/net_equipment.html"><i class="fas fa-chevron-left"></i> <span class="link-text">تجهیزات شبکه محور</span></a></li>
+          <li><a class="nav-link" href="forms/user_equipment.html"><i class="fas fa-chevron-left"></i> <span class="link-text">تجهیزات کاربر محور</span></a></li>
+        </ul>
+      </li>
+
+      <!-- 8. برنامه و بودجه -->
+      <li class="nav-item">
+        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#budgetSubmenu" aria-expanded="false">
+          <i class="fas fa-chart-line"></i> <span class="link-text">برنامه و بودجه</span>
+        </a>
+        <ul class="submenu collapse" id="budgetSubmenu">
+          <li><a class="nav-link" href="forms/budget_program.html"><i class="fas fa-chevron-left"></i> <span class="link-text">عنوان برنامه سالانه</span></a></li>
+          <li><a class="nav-link" href="forms/plan_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست برنامه</span></a></li>
+          <li><a class="nav-link" href="forms/activity_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست فعالیت</span></a></li>
+          <li><a class="nav-link" href="forms/budget_row.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست ردیف بودجه</span></a></li>
+          <li><a class="nav-link" href="forms/allocation_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست تخصیص</span></a></li>
+          <li><a class="nav-link" href="forms/activity_allocation.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست تخصیص فعالیت</span></a></li>
+          <li><a class="nav-link" href="forms/invoice_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست فاکتورها</span></a></li>
+        </ul>
+      </li>
+
+      <!-- 9. تنظیمات -->
+      <li class="nav-item">
+        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#settingSubmenu" aria-expanded="false">
+          <i class="fas fa-cog"></i> <span class="link-text">تنظیمات</span>
+        </a>
+        <ul class="submenu collapse" id="settingSubmenu">
+          <li><a class="nav-link" href="user_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست کاربران</span></a></li>
+          <li><a class="nav-link" href="role_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست نقش‌ها</span></a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-content-wrapper" id="mainContent">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <!-- سطر اول: تاریخ -->
+      <div class="topbar-date-row">
+        <span><i class="far fa-calendar-alt me-1"></i> ۵ خرداد ۱۴۰۳</span>
+        <small>۲۵ ذی القعده ۱۴۴۵</small>
+      </div>
+
+      <!-- سطر دوم: محتوای اصلی -->
+      <div class="topbar-main-row">
+
+        <div class="topbar-title-right">
+          <button class="topbar-toggle-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div>
+            <h5>سامانه مدیریت پروژه‌های دانشگاه علوم پزشکی</h5>
+            <small>خلاصه وضعیت پروژه‌ها، قراردادها و عملکرد پرسنل</small>
+          </div>
+        </div>
+
+        <div class="user-profile">
+          <div class="d-flex align-items-center gap-3">
+            <i class="far fa-bell text-muted" style="font-size: 18px;"></i>
+            <i class="far fa-envelope text-muted" style="font-size: 18px;"></i>
+          </div>
+          <div class="info">
+            <h6>کاربر تستی</h6>
+            <small>مدیر سیستم</small>
+          </div>
+          <img src="https://ui-avatars.com/api/?name=Fahimeh+Jam&background=0077b6&color=fff" alt="User">
+        </div>
+      </div>
+    </header>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+      <div class="col-xl-3 col-md-6">
+        <div class="stat-card card-1">
+          <div class="stat-text">
+            <h3>۲۶</h3>
+            <p>کل پرسنل</p>
+            <span class="stat-change"><i class="fas fa-arrow-up me-1"></i> ۱۳٪ در این ماه</span>
+          </div>
+          <div class="stat-icon"><i class="fas fa-user"></i></div>
+        </div>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <div class="stat-card card-2">
+          <div class="stat-text">
+            <h3>۱۸</h3>
+            <p>شرکت فعال</p>
+            <span class="stat-change"><i class="fas fa-arrow-up me-1"></i> ۸٪ در این ماه</span>
+          </div>
+          <div class="stat-icon"><i class="fas fa-building"></i></div>
+        </div>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <div class="stat-card card-3">
+          <div class="stat-text">
+            <h3>۱۲</h3>
+            <p>پروژه فعال</p>
+            <span class="stat-change"><i class="fas fa-arrow-up me-1"></i> ۱۵٪ در این ماه</span>
+          </div>
+          <div class="stat-icon"><i class="fas fa-folder"></i></div>
+        </div>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <div class="stat-card card-4">
+          <div class="stat-text">
+            <h3>۸</h3>
+            <p>قرارداد جاری</p>
+            <span class="stat-change"><i class="fas fa-arrow-down me-1"></i> ۷٪ در این ماه</span>
+          </div>
+          <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ردیف دوم: پروژه‌ها و چارت -->
+    <div class="row g-4">
+
+      <div class="col-lg-8">
+        <div class="section-card">
+          <div class="section-header">
+            <h6>آخرین پروژه‌ها</h6>
+            <a href="#">مشاهده همه</a>
+          </div>
+
+          <!-- جستجوی اختصاصی پروژه‌ها -->
+          <div class="mb-3 d-flex align-items-center gap-2" style="border-bottom: 1px solid #f3f4f6; padding-bottom: 10px;">
+            <div style="position: relative; flex-grow: 1; max-width: 300px;">
+              <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-light);"></i>
+              <input type="text" id="projectSearch" placeholder="جستجوی پروژه..." onkeyup="filterProjects()" style="width: 100%; padding: 6px 15px 6px 35px; border: 1px solid #e5e7eb; border-radius: 50px; background: var(--bg-light); font-size: 13px; outline: none; transition: 0.3s;">
+            </div>
+            <span style="font-size: 11px; color: var(--text-light);">تعداد: <span id="projectCount">3</span></span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-custom" id="projectTable">
+              <thead>
+              <tr>
+                <th>پروژه / شرکت</th>
+                <th>مدیر پروژه</th>
+                <th>وضعیت</th>
+                <th>تاریخ شروع</th>
+                <th>پیشرفت</th>
+              </tr>
+              </thead>
+              <tbody id="projectTableBody">
+              <tr>
+                <td>
+                  <strong>سامانه جامع پرسنلی</strong><br>
+                  <small class="text-muted"><i class="fas fa-building me-1"></i>پرتویان رایانه</small>
+                </td>
+                <td>علی محمدی</td>
+                <td><span class="status-badge in-progress">در حال اجرا</span></td>
+                <td>۱۴۰۳/۰۲/۱۰</td>
+                <td>
+                  <div class="progress-wrapper">
+                    <div class="progress-custom">
+                      <div class="progress-bar bg-primary" style="width: 65%"></div>
+                    </div>
+                    <span class="progress-text">۶۵%</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>اتوماسیون اداری</strong><br>
+                  <small class="text-muted"><i class="fas fa-building me-1"></i>فناوران عصر جدید</small>
+                </td>
+                <td>سارا رضایی</td>
+                <td><span class="status-badge done">تکمیل شده</span></td>
+                <td>۱۴۰۳/۰۱/۲۰</td>
+                <td>
+                  <div class="progress-wrapper">
+                    <div class="progress-custom">
+                      <div class="progress-bar bg-success" style="width: 100%"></div>
+                    </div>
+                    <span class="progress-text">۱۰۰%</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>سامانه مدیریت آموزش</strong><br>
+                  <small class="text-muted"><i class="fas fa-building me-1"></i>تابان دانش</small>
+                </td>
+                <td>سینا احمدی</td>
+                <td><span class="status-badge pending">در انتظار</span></td>
+                <td>۱۴۰۳/۰۳/۰۵</td>
+                <td>
+                  <div class="progress-wrapper">
+                    <div class="progress-custom">
+                      <div class="progress-bar bg-warning" style="width: 15%"></div>
+                    </div>
+                    <span class="progress-text">۱۵%</span>
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="section-card">
+          <div class="section-header">
+            <h6>نمودار کلی پروژه‌ها</h6>
+            <a href="#">جزئیات</a>
+          </div>
+          <div>
+            <div class="donut-container">
+              <canvas id="projectChart"></canvas>
+            </div>
+            <ul class="chart-legend">
+              <li><span style="color:var(--deep-twilight)">تکمیل شده</span> <span>۵۳%</span></li>
+              <li><span style="color:var(--bright-teal-blue)">در حال اجرا</span> <span>۲۵%</span></li>
+              <li><span style="color:var(--turquoise-surf)">در انتظار</span> <span>۱۸%</span></li>
+              <li><span style="color:#ef4444">متوقف</span> <span>۱۱%</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ردیف سوم: برنامه و بودجه -->
+    <!-- ========================================== -->
+    <div class="row g-4 mt-2">
+      <div class="col-12">
+        <div class="section-card">
+          <div class="section-header">
+            <h6><i class="fas fa-chart-line me-2" style="color:var(--deep-twilight)"></i>برنامه و بودجه</h6>
+            <a href="#">مشاهده همه</a>
+          </div>
+          <div class="row g-4">
+
+            <!-- ===== سمت چپ: جدول ===== -->
+            <div class="col-lg-7">
+              <div class="budget-table-wrapper">
+                <table class="table budget-table-custom">
+                  <thead>
+                  <tr>
+                    <th>عنوان بودجه</th>
+                    <th>مبلغ مصوب (ریال)</th>
+                    <th>وضعیت</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr>
+                    <td><strong>توسعه زیرساخت‌های فاوا</strong></td>
+                    <td>۱۲۰,۰۰۰,۰۰۰,۰۰۰</td>
+                    <td><span class="budget-badge high">تخصیص کامل</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>نگهداری سامانه‌های موجود</strong></td>
+                    <td>۴۵,۰۰۰,۰۰۰,۰۰۰</td>
+                    <td><span class="budget-badge medium">در حال تخصیص</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>خرید تجهیزات جدید</strong></td>
+                    <td>۲۸,۰۰۰,۰۰۰,۰۰۰</td>
+                    <td><span class="budget-badge low">در انتظار تصویب</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>آموزش و توانمندسازی</strong></td>
+                    <td>۱۲,۰۰۰,۰۰۰,۰۰۰</td>
+                    <td><span class="budget-badge high">تخصیص کامل</span></td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- ===== سمت راست: نمودار میله‌ای با تولتیپ شناور ===== -->
+            <div class="col-lg-5">
+              <div class="budget-chart-container">
+
+                <div class="budget-bar-row" data-percent="100" data-amount="۱۲۰ میلیارد ریال">
+                  <span class="label"><i class="fas fa-server"></i> توسعه زیرساخت‌ها</span>
+                  <div class="bar-track">
+                    <div class="fill twilight" style="width: 100%"></div>
+                    <div class="bar-tooltip"><i class="fas fa-check-circle tooltip-icon"></i>۱۰۰% - ۱۲۰ میلیارد ریال</div>
+                  </div>
+                  <span class="value">۱۰۰%</span>
+                </div>
+
+                <div class="budget-bar-row" data-percent="60" data-amount="۴۵ میلیارد ریال">
+                  <span class="label"><i class="fas fa-sync-alt"></i> نگهداری سامانه‌ها</span>
+                  <div class="bar-track">
+                    <div class="fill blue" style="width: 60%"></div>
+                    <div class="bar-tooltip"><i class="fas fa-clock tooltip-icon"></i>۶۰% - ۴۵ میلیارد ریال</div>
+                  </div>
+                  <span class="value">۶۰%</span>
+                </div>
+
+                <div class="budget-bar-row" data-percent="25" data-amount="۲۸ میلیارد ریال">
+                  <span class="label"><i class="fas fa-microchip"></i> خرید تجهیزات</span>
+                  <div class="bar-track">
+                    <div class="fill teal" style="width: 25%"></div>
+                    <div class="bar-tooltip"><i class="fas fa-exclamation-triangle tooltip-icon"></i>۲۵% - ۲۸ میلیارد ریال</div>
+                  </div>
+                  <span class="value">۲۵%</span>
+                </div>
+
+                <div class="budget-bar-row" data-percent="90" data-amount="۱۲ میلیارد ریال">
+                  <span class="label"><i class="fas fa-graduation-cap"></i> آموزش پرسنل</span>
+                  <div class="bar-track">
+                    <div class="fill twilight" style="width: 90%"></div>
+                    <div class="bar-tooltip"><i class="fas fa-star tooltip-icon"></i>۹۰% - ۱۲ میلیارد ریال</div>
+                  </div>
+                  <span class="value">۹۰%</span>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ردیف چهارم: دفترچه تلفن | تقویم | اعلان‌ها -->
+    <!-- ========================================== -->
+    <div class="row g-4 mt-2">
+
+      <!-- دفترچه تلفن -->
+      <div class="col-lg-4">
+        <div class="section-card">
+          <div class="section-header">
+            <h6><i class="fas fa-address-book me-2" style="color:var(--deep-twilight)"></i>دفترچه تلفن</h6>
+            <a href="#">مشاهده همه</a>
+          </div>
+          <div class="phonebook-section">
+            <div class="phonebook-search-wrapper">
+              <div class="input-group-custom">
+                <i class="fas fa-search"></i>
+                <input type="text" id="phonebookSearch" placeholder="جستجوی نام، واحد یا شماره..." onkeyup="filterPhonebook()">
+              </div>
+              <span style="font-size: 11px; color: var(--text-light); white-space: nowrap;">تعداد: <span id="phonebookCount">0</span></span>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table phonebook-table-custom" id="phonebookTable">
+                <thead>
+                <tr>
+                  <th style="width: 30px;">#</th>
+                  <th>نام</th>
+                  <th>واحد</th>
+                  <th>داخلی</th>
+                </tr>
+                </thead>
+                <tbody id="phonebookBody">
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pagination-custom" id="phonebookPagination" style="display: none;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- تقویم (کامل و ردیف‌بندی شده) -->
+      <div class="col-lg-4">
+        <div class="section-card">
+          <div class="section-header">
+            <h6>خرداد ۱۴۰۳</h6>
+            <a href="#">مشاهده تقویم</a>
+          </div>
+          <div class="calendar-grid">
+            <div class="text-muted small">ش</div><div class="text-muted small">ی</div><div class="text-muted small">د</div><div class="text-muted small">س</div><div class="text-muted small">چ</div><div class="text-muted small">پ</div><div class="text-muted small">ج</div>
+            <div class="day other-month">۲۹</div><div class="day other-month">۳۰</div><div class="day">۱</div><div class="day">۲</div><div class="day">۳</div><div class="day">۴</div><div class="day active">۵</div>
+            <div class="day">۶</div><div class="day">۷</div><div class="day">۸</div><div class="day">۹</div><div class="day">۱۰</div><div class="day">۱۱</div><div class="day">۱۲</div>
+            <div class="day">۱۳</div><div class="day">۱۴</div><div class="day">۱۵</div><div class="day">۱۶</div><div class="day">۱۷</div><div class="day">۱۸</div><div class="day">۱۹</div>
+            <div class="day">۲۰</div><div class="day">۲۱</div><div class="day">۲۲</div><div class="day">۲۳</div><div class="day">۲۴</div><div class="day">۲۵</div><div class="day">۲۶</div>
+          </div>
+
+          <div class="meeting-list">
+            <div class="meeting-item">
+              <div class="meeting-info"><span class="meeting-dot blue"></span> <span>جلسه بررسی پروژه پرسنلی</span></div>
+              <span class="meeting-time">۱۰:۰۰</span>
+            </div>
+            <div class="meeting-item">
+              <div class="meeting-info"><span class="meeting-dot purple"></span> <span>جلسه حضوری</span></div>
+              <span class="meeting-time">۱۴:۳۰</span>
+            </div>
+            <div class="meeting-item">
+              <div class="meeting-info"><span class="meeting-dot blue"></span> <span>جلسه با شرکت فناوران</span></div>
+              <span class="meeting-time">۱۶:۰۰</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- اعلان‌ها (کامل) -->
+      <div class="col-lg-4">
+        <div class="section-card">
+          <div class="section-header">
+            <h6>اعلان‌ها</h6>
+            <a href="#">مشاهده همه</a>
+          </div>
+          <div>
+            <div class="notification-item">
+              <i class="fas fa-check-circle check"></i>
+              <div><p><strong>قرارداد</strong> پروژه سامانه جامع پرسنلی تایید شد.</p><small class="text-muted">۳۰ دقیقه پیش</small></div>
+            </div>
+            <div class="notification-item">
+              <i class="fas fa-exclamation-triangle warn"></i>
+              <div><p>مهلت ارایه گزارش ماهانه پروژه <strong>۳</strong> روز دیگر.</p><small class="text-muted">۲ ساعت پیش</small></div>
+            </div>
+            <div class="notification-item">
+              <i class="fas fa-info-circle info"></i>
+              <div><p>امضای جدید سامانه در تاریخ <strong>۱۵</strong> خرداد منتشر می‌شود.</p><small class="text-muted">۱ روز پیش</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- End Main Content Wrapper -->
+</div> <!-- End App Layout -->
+
+<!-- Scripts -->
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/chart.js"></script>
+
+<script>
+  // ==========================================
+  // 1. توابع سایدبار (فقط با دکمه همبرگری)
+  // ==========================================
+  function toggleSidebar() {
+    const layout = document.getElementById('appLayout');
+    layout.classList.toggle('sidebar-open');
+  }
+
+  // ==========================================
+  // 2. جستجوی اختصاصی پروژه‌ها
+  // ==========================================
+  function filterProjects() {
+    const input = document.getElementById('projectSearch');
+    const filter = input.value.toLowerCase();
+    const tableBody = document.getElementById('projectTableBody');
+    const rows = tableBody.getElementsByTagName('tr');
+
+    let visibleCount = 0;
+
+    for (let i = 0; i < rows.length; i++) {
+      const td = rows[i].getElementsByTagName('td');
+      let found = false;
+      for (let j = 0; j < td.length; j++) {
+        if (td[j].textContent.toLowerCase().indexOf(filter) > -1) {
+          found = true;
+          break;
+        }
+      }
+      if (found) {
+        rows[i].style.display = '';
+        visibleCount++;
+      } else {
+        rows[i].style.display = 'none';
+      }
+    }
+
+    document.getElementById('projectCount').textContent = visibleCount;
+  }
+
+  // ==========================================
+  // 3. سیستم دیتاتیبل داینامیک دفترچه تلفن
+  // ==========================================
+
+  const phonebookData = [
+    { name: 'احمد رضایی', unit: 'ستاد دانشگاه', phone: '۱۲۳۴' },
+    { name: 'سارا محمدی', unit: 'پشتیبانی شبکه', phone: '۵۶۷۸' },
+    { name: 'مهرداد کریمی', unit: 'دانشکده فناوری اطلاعات', phone: '۹۰۱۲' },
+    { name: 'فاطمه حسینی', unit: 'پشتیبانی سامانه‌ها', phone: '۳۴۵۶' },
+    { name: 'کامران رستمی', unit: 'مدیریت شبکه', phone: '۷۸۹۰' },
+    { name: 'ناهید ابراهیمی', unit: 'پورتال دانشجویی', phone: '۵۶۱۲' },
+    { name: 'رضا مهدوی', unit: 'دانشکده پزشکی', phone: '۲۲۳۳' },
+    { name: 'لیلا کریمی', unit: 'پشتیبانی نرم‌افزار', phone: '۴۴۵۵' },
+    { name: 'حمید رضازاده', unit: 'آی‌تی مرکز', phone: '۶۶۷۷' },
+    { name: 'زهرا احمدی', unit: 'اداری', phone: '۸۸۹۹' },
+    { name: 'امیر حسینی', unit: 'دانشکده مهندسی', phone: '۱۱۲۲' },
+    { name: 'مریم عباسی', unit: 'روابط عمومی', phone: '۳۳۴۴' }
+  ];
+
+  let phonebookCurrentPage = 1;
+  const rowsPerPage = 4;
+  let filteredPhonebookData = [...phonebookData];
+
+  function renderPhonebook() {
+    const tableBody = document.getElementById('phonebookBody');
+    tableBody.innerHTML = '';
+
+    const start = (phonebookCurrentPage - 1) * rowsPerPage;
+    const end = Math.min(start + rowsPerPage, filteredPhonebookData.length);
+    const pageData = filteredPhonebookData.slice(start, end);
+
+    pageData.forEach((item, index) => {
+      const row = document.createElement('tr');
+      const globalIndex = start + index + 1;
+      row.innerHTML = `
+        <td><span class="row-number">${globalIndex}</span></td>
+        <td>${item.name}</td>
+        <td>${item.unit}</td>
+        <td>${item.phone}</td>
+      `;
+      tableBody.appendChild(row);
+    });
+
+    document.getElementById('phonebookCount').textContent = filteredPhonebookData.length;
+
+    const totalPages = Math.ceil(filteredPhonebookData.length / rowsPerPage);
+    const paginationContainer = document.getElementById('phonebookPagination');
+
+    if (totalPages <= 1) {
+      paginationContainer.style.display = 'none';
+      return;
+    } else {
+      paginationContainer.style.display = 'flex';
+    }
+
+    let btnsHTML = `<button class="page-btn ${phonebookCurrentPage === 1 ? 'disabled' : ''}" onclick="changePhonebookPage(-1)">قبلی</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+      btnsHTML += `<button class="page-btn ${i === phonebookCurrentPage ? 'active' : ''}" onclick="goToPhonebookPage(${i})">${i}</button>`;
+    }
+    btnsHTML += `<button class="page-btn ${phonebookCurrentPage === totalPages ? 'disabled' : ''}" onclick="changePhonebookPage(1)">بعدی</button>`;
+    paginationContainer.innerHTML = btnsHTML;
+  }
+
+  function goToPhonebookPage(page) {
+    const totalPages = Math.ceil(filteredPhonebookData.length / rowsPerPage);
+    if (page < 1 || page > totalPages) return;
+    phonebookCurrentPage = page;
+    renderPhonebook();
+  }
+
+  function changePhonebookPage(delta) {
+    goToPhonebookPage(phonebookCurrentPage + delta);
+  }
+
+  function filterPhonebook() {
+    const input = document.getElementById('phonebookSearch');
+    const filter = input.value.toLowerCase();
+
+    filteredPhonebookData = phonebookData.filter(item => {
+      return item.name.toLowerCase().includes(filter) ||
+              item.unit.toLowerCase().includes(filter) ||
+              item.phone.toLowerCase().includes(filter);
+    });
+
+    phonebookCurrentPage = 1;
+    renderPhonebook();
+  }
+
+  // ==========================================
+  // 4. چارت دایره‌ای
+  // ==========================================
+  const ctx = document.getElementById('projectChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['تکمیل شده', 'در حال اجرا', 'در انتظار', 'متوقف'],
+      datasets: [{
+        data: [53, 25, 18, 11],
+        backgroundColor: ['#03045e', '#0077b6', '#00b4d8', '#ef4444'],
+        borderWidth: 0,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '75%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: true }
+      },
+      animation: {
+        animateScale: true,
+        animateRotate: true
+      }
+    }
+  });
+
+  // ==========================================
+  // 5. تولتیپ شناور برای نمودار بودجه
+  // ==========================================
+  document.addEventListener('DOMContentLoaded', function() {
+    // بارگذاری اولیه
+    document.getElementById('projectCount').textContent = document.getElementById('projectTableBody').getElementsByTagName('tr').length;
+    renderPhonebook();
+
+    // ===== تولتیپ شناور =====
+    const barRows = document.querySelectorAll('.budget-bar-row');
+
+    barRows.forEach(row => {
+      const tooltip = row.querySelector('.bar-tooltip');
+      if (!tooltip) return;
+
+      row.addEventListener('mouseenter', function(e) {
+        tooltip.classList.add('visible');
+        positionTooltip(tooltip, e);
+      });
+
+      row.addEventListener('mousemove', function(e) {
+        positionTooltip(tooltip, e);
+      });
+
+      row.addEventListener('mouseleave', function() {
+        tooltip.classList.remove('visible');
+      });
+    });
+
+    function positionTooltip(tooltip, e) {
+      const x = e.clientX + 15;
+      const y = e.clientY - 15;
+
+      const tooltipWidth = tooltip.offsetWidth || 200;
+      const tooltipHeight = tooltip.offsetHeight || 45;
+
+      let left = x;
+      let top = y - tooltipHeight;
+
+      if (left + tooltipWidth > window.innerWidth - 10) {
+        left = e.clientX - tooltipWidth - 15;
+      }
+      if (left < 10) {
+        left = 10;
+      }
+      if (top < 10) {
+        top = e.clientY + 15;
+      }
+      if (top + tooltipHeight > window.innerHeight - 10) {
+        top = window.innerHeight - tooltipHeight - 10;
+      }
+
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+    }
+  });
+
+  // ==========================================
+  // 6. آپلود و پیش‌نمایش عکس در فرم پرسنل
+  // ==========================================
+  function previewImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        // پیدا کردن باکس آپلود عکس در صفحه current
+        const uploadBox = document.getElementById('avatarUploadBox');
+        if(uploadBox) {
+          uploadBox.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; border-radius: var(--border-radius); object-fit: cover; border: 2px solid #0077b6;">`;
+          uploadBox.style.border = "none";
+        }
+      }
+      reader.readAsDataURL(file);
+    }
+  }
+</script>
+
+</body>
+</html>

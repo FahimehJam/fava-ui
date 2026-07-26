@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه فاوا - مدیریت لیست کالا</title>
+
+    <!-- ===== استایل‌های کامپوننت‌ها ===== -->
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/components/button.css" />
+    <link rel="stylesheet" href="css/components/combobox.css" />
+    <link rel="stylesheet" href="css/components/alert.css" />
+    <link rel="stylesheet" href="css/components/modal.css" />
+    <link rel="stylesheet" href="css/components/tags.css" />
+    <link rel="stylesheet" href="css/components/switch.css" />
+    <link rel="stylesheet" href="css/components/notification.css" />
+    <link rel="stylesheet" href="css/components/tooltip.css" />
+    <link rel="stylesheet" href="css/components/table.css" />
+    <link rel="stylesheet" href="css/components/form.css" />
+
+    <!-- Bootstrap 5 RTL CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font (Vazirmatn) -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+
+    <style>
+        /* --- پالت رنگی یکسان با سامانه --- */
+        :root {
+            --deep-twilight: #03045e;
+            --bright-teal-blue: #0077b6;
+            --turquoise-surf: #00b4d8;
+            --frosted-blue: #90e0ef;
+            --light-cyan: #caf0f8;
+
+            --bg-light: #f4f8fb;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+
+            --border-radius: 16px;
+            --shadow: 0 0.15rem 1.5rem 0 rgba(3, 4, 94, 0.06);
+
+            --sidebar-width: 250px;
+            --sidebar-collapsed-width: 80px;
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            height: 100vh;
+        }
+
+        /* --- ساختار Grid --- */
+        .app-layout {
+            display: grid;
+            grid-template-columns: var(--sidebar-collapsed-width) 1fr;
+            min-height: 100vh;
+            width: 100%;
+            transition: grid-template-columns var(--transition-speed);
+        }
+        .app-layout.sidebar-open { grid-template-columns: var(--sidebar-width) 1fr; }
+        .app-layout.sidebar-open .main-content-wrapper { padding-right: 20px; }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            background-color: var(--deep-twilight);
+            padding: 20px 10px;
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            overflow-y: auto;
+            overflow-x: hidden;
+            white-space: nowrap;
+            box-shadow: 2px 0 15px rgba(3, 4, 94, 0.15);
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            transition: width var(--transition-speed), padding var(--transition-speed);
+            width: var(--sidebar-collapsed-width);
+        }
+        .app-layout.sidebar-open .sidebar { width: var(--sidebar-width); padding: 20px 15px; }
+
+        .sidebar-brand {
+            display: flex; align-items: center; justify-content: flex-start; margin-bottom: 30px; padding: 0 5px; overflow: hidden; height: 60px;
+        }
+        .brand-info { display: flex; align-items: center; overflow: hidden; }
+        .brand-info i { font-size: 24px; color: var(--light-cyan); margin-left: 10px; min-width: 24px; }
+        .sidebar-brand-text { opacity: 0; width: 0; overflow: hidden; transition: opacity var(--transition-speed); }
+        .app-layout.sidebar-open .sidebar-brand-text { opacity: 1; width: auto; }
+        .sidebar-brand h5 { font-weight: 700; margin: 0; font-size: 16px; color: #fff; }
+        .sidebar-brand small { font-size: 10px; color: var(--light-cyan); }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.7); padding: 12px 15px; border-radius: 12px; margin-bottom: 5px; font-size: 14px;
+            display: flex; align-items: center; transition: all 0.2s; position: relative; overflow: hidden; cursor: pointer;
+        }
+        .nav-link:hover, .nav-link.active { background-color: var(--bright-teal-blue); color: #fff; }
+        .nav-link i { min-width: 24px; margin-left: 10px; color: rgba(255, 255, 255, 0.7); font-size: 18px; text-align: center; }
+        .nav-link.active i, .nav-link:hover i { color: #fff; }
+
+        .nav-link .link-text { opacity: 0; width: 0; overflow: hidden; transition: opacity var(--transition-speed); }
+        .app-layout.sidebar-open .nav-link .link-text { opacity: 1; width: auto; }
+
+        .nav-link.dropdown-toggle::after {
+            display: inline-block; margin-right: auto; margin-left: 0; transition: transform 0.3s ease;
+            content: "\f107"; font-family: "Font Awesome 6 Free"; font-weight: 900; border: none; vertical-align: 0;
+            font-size: 12px; opacity: 0; color: rgba(255, 255, 255, 0.5);
+        }
+        .app-layout.sidebar-open .nav-link.dropdown-toggle::after { opacity: 1; }
+        .nav-link.dropdown-toggle.show::after { transform: rotate(180deg); }
+
+        /* --- زیرمنوها --- */
+        .submenu {
+            padding-right: 15px; list-style: none; padding-left: 0; max-height: 0; opacity: 0;
+            overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+        }
+        .submenu.collapse:not(.show) { display: block !important; }
+        .submenu.collapse.show { max-height: 500px; opacity: 1; }
+        .app-layout.sidebar-open .submenu.collapse.show { display: block; }
+        .submenu .nav-link { font-size: 13px; padding: 8px 15px; padding-right: 20px; color: rgba(255, 255, 255, 0.6); }
+        .submenu .nav-link:hover { color: #fff; background-color: rgba(0, 119, 182, 0.3); }
+        .submenu .nav-link i { font-size: 14px; min-width: 20px; margin-left: 10px; }
+
+        /* --- Main Content --- */
+        .main-content-wrapper { padding: 20px 30px; background-color: var(--bg-light); box-sizing: border-box; width: 100%; min-height: 100vh; transition: padding-right var(--transition-speed); }
+
+        /* --- Topbar --- */
+        .topbar {
+            display: flex; flex-direction: column; background: #fff; padding: 0 25px; border-radius: var(--border-radius);
+            margin-bottom: 25px; box-shadow: var(--shadow);
+        }
+        .topbar-date-row {
+            width: 100%; display: flex; justify-content: flex-end; padding: 5px 0; border-bottom: 1px solid #f3f4f6; color: var(--text-light);
+        }
+        .topbar-date-row span, .topbar-date-row small { font-size: 10px; margin-right: 10px; }
+        .topbar-main-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; flex-wrap: wrap; gap: 10px; }
+        .topbar-toggle-btn {
+            background: transparent; border: 1px solid #e5e7eb; border-radius: 8px; padding: 6px 10px; cursor: pointer;
+            color: var(--text-dark); transition: 0.2s; display: flex; align-items: center; justify-content: center; font-size: 18px;
+        }
+        .topbar-toggle-btn:hover { background: var(--bg-light); border-color: var(--bright-teal-blue); color: var(--bright-teal-blue); }
+        .topbar-title-right { padding-right: 15px; text-align: right; flex-grow: 0; display: flex; align-items: center; gap: 15px; }
+        .topbar-title-right h5 { margin: 0; font-weight: 700; font-size: 16px; color: var(--deep-twilight); }
+        .topbar-title-right small { color: var(--text-light); font-size: 11px; }
+        .user-profile { display: flex; align-items: center; gap: 15px; }
+        .user-profile img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .user-profile h6 { margin: 0; font-size: 14px; font-weight: 700; }
+        .user-profile small { font-size: 11px; color: var(--text-light); }
+
+        /* --- استایل‌های اختصاصی لیست کالا --- */
+        .section-card {
+            background: #fff; border-radius: var(--border-radius); padding: 25px; box-shadow: var(--shadow); margin-bottom: 30px; border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f3f4f6; padding-bottom: 15px; margin-bottom: 20px;
+        }
+        .section-header h5 { margin: 0; font-weight: 700; color: var(--deep-twilight); }
+
+        .required-star { color: #dc3545; margin-right: 4px; }
+
+        /* دکمه اکسل */
+        .btn-excel { background-color: #1D6F42; color: white; border: none; }
+        .btn-excel:hover { color: white; background-color: #155a33; }
+
+        /* ★★★ جدول استاندارد ۴ ستونه و ریسپانسیو ★★★ */
+        .table-custom { width: 100%; margin-bottom: 0; font-size: 14px; }
+        .table-custom thead th {
+            color: #6b7280;
+            border-bottom: 2px solid var(--bright-teal-blue);
+            text-align: center;
+            padding: 12px;
+            white-space: nowrap;
+        }
+        .table-custom tbody td {
+            vertical-align: middle;
+            border-bottom: 1px solid #f3f4f6;
+            text-align: center;
+            padding: 12px;
+        }
+        .table-custom tbody tr:hover { background-color: rgba(0, 119, 182, 0.05); }
+        .status-badge { padding: 4px 12px; border-radius: 50px; font-size: 11px; font-weight: 600; }
+        .status-badge.active { background: #d1fae5; color: #059669; }
+
+        /* ★★★ حالت ریسپانسیو برای موبایل ★★★ */
+        @media (max-width: 768px) {
+            .table-responsive-custom {
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            .table-custom thead { display: none; }
+            .table-custom tbody, .table-custom tr, .table-custom td { display: block; width: 100%; }
+            .table-custom tr {
+                margin-bottom: 15px;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                padding: 10px;
+                background: #fff;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+            .table-custom td {
+                text-align: right;
+                padding: 8px 10px;
+                border-bottom: 1px solid #f3f4f6;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .table-custom td:last-child { border-bottom: none; }
+            .table-custom td::before {
+                content: attr(data-label);
+                font-weight: 700;
+                color: #6b7280;
+                margin-left: 10px;
+            }
+        }
+
+        /* ========================================================== */
+        /* ★★★ RIPPLE EFFECT CSS ★★★ */
+        /* ========================================================== */
+        .ripple-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .ripple-btn:active { transform: scale(0.96); }
+        .ripple-effect {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.7);
+            transform: scale(0);
+            animation: ripple-animation 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            pointer-events: none;
+        }
+        @keyframes ripple-animation {
+            to { transform: scale(4); opacity: 0; }
+        }
+
+        @media (max-width: 992px) {
+            .app-layout { display: block; }
+            .sidebar { position: fixed; top: 0; right: -260px; width: 260px; height: 100vh; z-index: 1050; padding: 20px 15px; transition: right 0.3s ease; }
+            .app-layout.sidebar-open .sidebar { right: 0; width: 260px; }
+            .main-content-wrapper { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-layout" id="appLayout">
+
+    <!-- سایدبار کامل (منوی اطلاعات پایه فعال شده است) -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-info">
+                <i class="fas fa-layer-group"></i>
+                <div class="sidebar-brand-text">
+                    <h5>سامانه معاونت فاوا</h5>
+                    <small>دانشگاه علوم پزشکی</small>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav flex-column">
+
+            <!-- 1. صفحه اصلی -->
+            <li class="nav-item">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-home"></i> <span class="link-text">صفحه اصلی</span>
+                </a>
+            </li>
+
+            <!-- 2. اطلاعات پایه (این منو فعال شده است) -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle show" href="#" data-bs-toggle="collapse" data-bs-target="#baseSubmenu" aria-expanded="true">
+                    <i class="fas fa-database"></i> <span class="link-text">اطلاعات پایه</span>
+                </a>
+                <ul class="submenu collapse show" id="baseSubmenu">
+                    <li><a class="nav-link" href="center_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست مراکز</span></a></li>
+                    <li><a class="nav-link" href="deputy_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست معاونت‌ها</span></a></li>
+                    <li><a class="nav-link" href="section_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست بخش‌ها</span></a></li>
+                    <li><a class="nav-link" href="physical_location_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست محل‌های فیزیکی</span></a></li>
+                    <li><a class="nav-link" href="equipment_type_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست نوع تجهیزات</span></a></li>
+                    <li><a class="nav-link" href="network_type_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست انواع شبکه</span></a></li>
+                    <li><a class="nav-link" href="product_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست کالا</span></a></li>
+                </ul>
+            </li>
+
+            <!-- 3. منابع انسانی -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#hrSubmenu" aria-expanded="false">
+                    <i class="fas fa-users"></i> <span class="link-text">منابع انسانی</span>
+                </a>
+                <ul class="submenu collapse" id="hrSubmenu">
+                    <li><a class="nav-link" href="personnel.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست پرسنل</span></a></li>
+                </ul>
+            </li>
+
+            <!-- 4. شرکت‌ها -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#companiesSubmenu" aria-expanded="false">
+                    <i class="fas fa-building"></i> <span class="link-text">شرکت‌ها</span>
+                </a>
+                <ul class="submenu collapse" id="companiesSubmenu">
+                    <li><a class="nav-link" href="company.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست شرکت‌ها</span></a></li>
+                </ul>
+            </li>
+
+            <!-- 5. قراردادها -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#contractsSubmenu" aria-expanded="false">
+                    <i class="fas fa-file-signature"></i> <span class="link-text">قراردادها</span>
+                </a>
+                <ul class="submenu collapse" id="contractsSubmenu">
+                    <li><a class="nav-link" href="contract.html"><i class="fas fa-chevron-left"></i> <span class="link-text">صدور قرارداد جدید</span></a></li>
+                </ul>
+            </li>
+
+            <!-- 6. پروژه‌ها -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#projectSubmenu" aria-expanded="false">
+                    <i class="fas fa-folder-open"></i> <span class="link-text">پروژه‌ها</span>
+                </a>
+                <ul class="submenu collapse" id="projectSubmenu">
+                    <li><a class="nav-link" href="project.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست پروژه‌ها</span></a></li>
+                </ul>
+            </li>
+
+            <!-- 7. سامانه‌ها -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#systemSubmenu" aria-expanded="false">
+                    <i class="fas fa-laptop"></i> <span class="link-text">سامانه‌ها</span>
+                </a>
+                <ul class="submenu collapse" id="systemSubmenu">
+                    <li><a class="nav-link" href="system.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست سامانه‌ها</span></a></li>
+                </ul>
+            </li>
+
+            <!-- 8. تجهیزات -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#equipSubmenu" aria-expanded="false">
+                    <i class="fas fa-microchip"></i> <span class="link-text">تجهیزات</span>
+                </a>
+                <ul class="submenu collapse" id="equipSubmenu">
+                    <li><a class="nav-link" href="net_equipment.html"><i class="fas fa-chevron-left"></i> <span class="link-text">تجهیزات شبکه محور</span></a></li>
+                    <li><a class="nav-link" href="user_equipment.html"><i class="fas fa-chevron-left"></i> <span class="link-text">تجهیزات کاربر محور</span></a></li>
+                </ul>
+            </li>
+
+            <!-- 9. برنامه و بودجه -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#budgetSubmenu" aria-expanded="false">
+                    <i class="fas fa-chart-line"></i> <span class="link-text">برنامه و بودجه</span>
+                </a>
+                <ul class="submenu collapse" id="budgetSubmenu">
+                    <li><a class="nav-link" href="budget_program.html"><i class="fas fa-chevron-left"></i> <span class="link-text">عنوان برنامه سالانه</span></a></li>
+                    <li><a class="nav-link" href="plan_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست برنامه</span></a></li>
+                    <li><a class="nav-link" href="activity_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست فعالیت</span></a></li>
+                    <li><a class="nav-link" href="allocation_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست تخصیص</span></a></li>
+                    <li><a class="nav-link" href="activity_allocation.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست تخصیص فعالیت</span></a></li>
+                    <li><a class="nav-link" href="invoice_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست فاکتورها</span></a></li>
+                </ul>
+            </li>
+
+            <!-- 10. تنظیمات -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#settingSubmenu" aria-expanded="false">
+                    <i class="fas fa-cog"></i> <span class="link-text">تنظیمات</span>
+                </a>
+                <ul class="submenu collapse" id="settingSubmenu">
+                    <li><a class="nav-link" href="user_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست کاربران</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست نقش‌ها</span></a></li>
+                </ul>
+            </li>
+
+        </ul>
+    </nav>
+
+    <!-- محتوا -->
+    <div class="main-content-wrapper" id="mainContent">
+        <header class="topbar">
+            <div class="topbar-date-row">
+                <span><i class="far fa-calendar-alt me-1"></i> ۵ خرداد ۱۴۰۳</span>
+                <small>۲۵ ذوالقعده ۱۴۴۵</small>
+            </div>
+            <div class="topbar-main-row">
+                <div class="topbar-title-right">
+                    <button class="topbar-toggle-btn ripple-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                    <div>
+                        <h5>مدیریت لیست کالا</h5>
+                        <small>ثبت و ویرایش کالاها</small>
+                    </div>
+                </div>
+                <div class="user-profile">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="far fa-bell text-muted" style="font-size: 18px;"></i>
+                        <i class="far fa-envelope text-muted" style="font-size: 18px;"></i>
+                    </div>
+                    <div class="info">
+                        <h6>فهیمه جم</h6>
+                        <small>مدیر سیستم</small>
+                    </div>
+                    <img src="https://ui-avatars.com/api/?name=Fahimeh+Jam&background=0077b6&color=fff" alt="User">
+                </div>
+            </div>
+        </header>
+
+        <!-- ================= فرم ثبت کالا (با ترتیب اکسل) ================= -->
+        <div class="section-card">
+            <div class="section-header">
+                <h5><i class="fas fa-box me-2" style="color:var(--bright-teal-blue)"></i>فرم ثبت و ویرایش کالا</h5>
+                <button class="btn btn-outline-primary btn-sm ripple-btn"><i class="fas fa-pen"></i> ویرایش</button>
+            </div>
+
+            <form>
+                <!-- ردیف ۱ -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label">نام کالا <span class="required-star">*</span></label>
+                        <input type="text" class="form-control" placeholder="نام کالا" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">واحد اندازه‌گیری <span class="required-star">*</span></label>
+                        <select class="form-select" required>
+                            <option selected disabled>انتخاب کنید</option>
+                            <option>عدد</option>
+                            <option>دستگاه</option>
+                            <option>درصد</option>
+                            <option>متر</option>
+                            <option>کیلوگرم</option>
+                            <option>ماهانه</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">نوع کالا</label>
+                        <select class="form-select">
+                            <option selected disabled>انتخاب کنید</option>
+                            <option>اقلام مصرفی</option>
+                            <option>اقلام سرمایه‌ای</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- دکمه‌های پایین فرم -->
+                <div class="mt-4 border-top pt-3 d-flex gap-3">
+                    <button type="submit" class="btn btn-primary ripple-btn"><i class="fas fa-save me-1"></i> ثبت کالا</button>
+                    <button type="reset" class="btn btn-secondary ripple-btn"><i class="fas fa-times me-1"></i> انصراف</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ================= جدول لیست کالا و دکمه خروجی اکسل ================= -->
+        <div class="section-card">
+            <div class="section-header">
+                <h5><i class="fas fa-list-ul me-2" style="color:var(--bright-teal-blue)"></i>لیست کالاهای ثبت شده</h5>
+                <button class="btn btn-excel btn-sm px-3 ripple-btn"><i class="fas fa-file-excel me-1"></i> خروجی اکسل</button>
+            </div>
+
+            <!-- ★★★ جدول با کلاس جدید ریسپانسیو ★★★ -->
+            <div class="table-responsive-custom">
+                <table class="table table-custom">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>نام کالا</th>
+                        <th>واحد</th>
+                        <th>نوع کالا</th>
+                        <th>وضعیت</th>
+                        <th>عملیات</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- نمونه ردیف ۱ -->
+                    <tr>
+                        <td data-label="#">1</td>
+                        <td data-label="نام کالا" class="fw-bold">کابل شبکه</td>
+                        <td data-label="واحد">متر</td>
+                        <td data-label="نوع کالا">اقلام مصرفی</td>
+                        <td data-label="وضعیت"><span class="status-badge active">فعال</span></td>
+                        <td data-label="عملیات">
+                            <!-- ★★★ منوی عملیات ★★★ -->
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle ripple-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> جزئیات</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> ویرایش</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-ban me-2"></i> غیرفعال</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- نمونه ردیف ۲ -->
+                    <tr>
+                        <td data-label="#">2</td>
+                        <td data-label="نام کالا" class="fw-bold">سوییچ شبکه</td>
+                        <td data-label="واحد">دستگاه</td>
+                        <td data-label="نوع کالا">اقلام سرمایه‌ای</td>
+                        <td data-label="وضعیت"><span class="status-badge active">فعال</span></td>
+                        <td data-label="عملیات">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle ripple-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i> جزئیات</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> ویرایش</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-ban me-2"></i> غیرفعال</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== اسکریپت‌ها ===== -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // ==========================================
+    // ★★★ تابع باز/بسته کردن سایدبار (فقط با دکمه همبرگری) ★★★
+    // ==========================================
+    function toggleSidebar() {
+        const layout = document.getElementById('appLayout');
+        layout.classList.toggle('sidebar-open');
+    }
+
+    // ==========================================
+    // ★★★ جلوگیری از بسته شدن سایدبار با کلیک روی منوها ★★★
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdownToggles = document.querySelectorAll('.sidebar .nav-link.dropdown-toggle');
+        dropdownToggles.forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        });
+    });
+
+    // ==========================================
+    // 2. RIPPLE EFFECT
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const rippleBtns = document.querySelectorAll('.ripple-btn');
+        rippleBtns.forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                const existingRipple = this.querySelector('.ripple-effect');
+                if (existingRipple) existingRipple.remove();
+
+                const rect = this.getBoundingClientRect();
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple-effect');
+
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const size = Math.max(rect.width, rect.height);
+
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = (x - size / 2) + 'px';
+                ripple.style.top = (y - size / 2) + 'px';
+
+                this.appendChild(ripple);
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

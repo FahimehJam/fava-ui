@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه فاوا - مدیریت لیست پرسنل</title>
+
+    <!-- ===== استایل‌های کامپوننت‌ها ===== -->
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/components/button.css" />
+    <link rel="stylesheet" href="../css/components/combobox.css" />
+    <link rel="stylesheet" href="../css/components/alert.css" />
+    <link rel="stylesheet" href="../css/components/modal.css" />
+    <link rel="stylesheet" href="../css/components/tags.css" />
+    <link rel="stylesheet" href="../css/components/switch.css" />
+    <link rel="stylesheet" href="../css/components/notification.css" />
+    <link rel="stylesheet" href="../css/components/tooltip.css" />
+    <link rel="stylesheet" href="../css/components/table.css" />
+    <link rel="stylesheet" href="../css/components/form.css" />
+
+    <!-- Bootstrap 5 RTL CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font (Vazirmatn) -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+
+    <!-- ===== استایل‌های اختصاصی Datepicker شمسی (npm-persian-datepicker) ===== -->
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/md-persian-datepicker/1.0.1/css/md-persian-datepicker.min.css">-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+
+
+    <style>
+        /* --- پالت رنگی --- */
+        :root {
+            --deep-twilight: #03045e;
+            --bright-teal-blue: #0077b6;
+            --turquoise-surf: #00b4d8;
+            --frosted-blue: #90e0ef;
+            --light-cyan: #caf0f8;
+
+            --bg-light: #f4f8fb;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+
+            --border-radius: 16px;
+            --shadow: 0 0.15rem 1.5rem 0 rgba(3, 4, 94, 0.06);
+
+            --sidebar-width: 250px;
+            --sidebar-collapsed-width: 80px;
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            height: 100vh;
+        }
+
+        /* --- ساختار Grid --- */
+        .app-layout {
+            display: grid;
+            grid-template-columns: var(--sidebar-collapsed-width) 1fr;
+            min-height: 100vh;
+            width: 100%;
+            transition: grid-template-columns var(--transition-speed);
+        }
+        .app-layout.sidebar-open { grid-template-columns: var(--sidebar-width) 1fr; }
+        .app-layout.sidebar-open .main-content-wrapper { padding-right: 20px; }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            background-color: var(--deep-twilight);
+            padding: 20px 10px;
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            overflow-y: auto;
+            overflow-x: hidden;
+            white-space: nowrap;
+            box-shadow: 2px 0 15px rgba(3, 4, 94, 0.15);
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            transition: width var(--transition-speed), padding var(--transition-speed);
+            width: var(--sidebar-collapsed-width);
+        }
+        .app-layout.sidebar-open .sidebar { width: var(--sidebar-width); padding: 20px 15px; }
+
+        .sidebar-brand {
+            display: flex; align-items: center; justify-content: flex-start; margin-bottom: 30px; padding: 0 5px; overflow: hidden; height: 60px;
+        }
+        .brand-info { display: flex; align-items: center; overflow: hidden; }
+        .brand-info i { font-size: 24px; color: var(--light-cyan); margin-left: 10px; min-width: 24px; }
+        .sidebar-brand-text { opacity: 0; width: 0; overflow: hidden; transition: opacity var(--transition-speed); }
+        .app-layout.sidebar-open .sidebar-brand-text { opacity: 1; width: auto; }
+        .sidebar-brand h5 { font-weight: 700; margin: 0; font-size: 16px; color: #fff; }
+        .sidebar-brand small { font-size: 10px; color: var(--light-cyan); }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.7); padding: 12px 15px; border-radius: 12px; margin-bottom: 5px; font-size: 14px;
+            display: flex; align-items: center; transition: all 0.2s; position: relative; overflow: hidden; cursor: pointer;
+        }
+        .nav-link:hover, .nav-link.active { background-color: var(--bright-teal-blue); color: #fff; }
+        .nav-link i { min-width: 24px; margin-left: 10px; color: rgba(255, 255, 255, 0.7); font-size: 18px; text-align: center; }
+        .nav-link.active i, .nav-link:hover i { color: #fff; }
+
+        .nav-link .link-text { opacity: 0; width: 0; overflow: hidden; transition: opacity var(--transition-speed); }
+        .app-layout.sidebar-open .nav-link .link-text { opacity: 1; width: auto; }
+
+        .nav-link.dropdown-toggle::after {
+            display: inline-block; margin-right: auto; margin-left: 0; transition: transform 0.3s ease;
+            content: "\f107"; font-family: "Font Awesome 6 Free"; font-weight: 900; border: none; vertical-align: 0;
+            font-size: 12px; opacity: 0; color: rgba(255, 255, 255, 0.5);
+        }
+        .app-layout.sidebar-open .nav-link.dropdown-toggle::after { opacity: 1; }
+        .nav-link.dropdown-toggle.show::after { transform: rotate(180deg); }
+
+        /* --- زیرمنوها --- */
+        .submenu {
+            padding-right: 15px; list-style: none; padding-left: 0; max-height: 0; opacity: 0;
+            overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+        }
+        .submenu.collapse:not(.show) { display: block !important; }
+        .submenu.collapse.show { max-height: 500px; opacity: 1; }
+        .app-layout.sidebar-open .submenu.collapse.show { display: block; }
+        .submenu .nav-link { font-size: 13px; padding: 8px 15px; padding-right: 20px; color: rgba(255, 255, 255, 0.6); }
+        .submenu .nav-link:hover { color: #fff; background-color: rgba(0, 119, 182, 0.3); }
+        .submenu .nav-link i { font-size: 14px; min-width: 20px; margin-left: 10px; }
+
+        /* --- Main Content --- */
+        .main-content-wrapper { padding: 20px 30px; background-color: var(--bg-light); box-sizing: border-box; width: 100%; min-height: 100vh; transition: padding-right var(--transition-speed); }
+
+        /* --- Topbar --- */
+        .topbar {
+            display: flex; flex-direction: column; background: #fff; padding: 0 25px; border-radius: var(--border-radius);
+            margin-bottom: 25px; box-shadow: var(--shadow);
+        }
+        .topbar-date-row {
+            width: 100%; display: flex; justify-content: flex-end; padding: 5px 0; border-bottom: 1px solid #f3f4f6; color: var(--text-light);
+        }
+        .topbar-date-row span, .topbar-date-row small { font-size: 10px; margin-right: 10px; }
+        .topbar-main-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; flex-wrap: wrap; gap: 10px; }
+        .topbar-toggle-btn {
+            background: transparent; border: 1px solid #e5e7eb; border-radius: 8px; padding: 6px 10px; cursor: pointer;
+            color: var(--text-dark); transition: 0.2s; display: flex; align-items: center; justify-content: center; font-size: 18px;
+        }
+        .topbar-toggle-btn:hover { background: var(--bg-light); border-color: var(--bright-teal-blue); color: var(--bright-teal-blue); }
+        .topbar-title-right { padding-right: 15px; text-align: right; flex-grow: 0; display: flex; align-items: center; gap: 15px; }
+        .topbar-title-right h5 { margin: 0; font-weight: 700; font-size: 16px; color: var(--deep-twilight); }
+        .topbar-title-right small { color: var(--text-light); font-size: 11px; }
+        .user-profile { display: flex; align-items: center; gap: 15px; }
+        .user-profile img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .user-profile h6 { margin: 0; font-size: 14px; font-weight: 700; }
+        .user-profile small { font-size: 11px; color: var(--text-light); }
+
+        /* --- استایل‌های اختصاصی پرسنل --- */
+        .section-card {
+            background: #fff; border-radius: var(--border-radius); padding: 25px; box-shadow: var(--shadow); margin-bottom: 30px; border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f3f4f6; padding-bottom: 15px; margin-bottom: 20px;
+        }
+        .section-header h5 { margin: 0; font-weight: 700; color: var(--deep-twilight); }
+
+        .required-star { color: #dc3545; margin-right: 4px; }
+
+        /* باکس آپلود عکس */
+        .avatar-upload-box {
+            width: 160px;
+            height: 160px;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            border: 2px dashed #d1d5db;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            cursor: pointer; transition: 0.3s; overflow: hidden; position: relative;
+            margin: 0 auto;
+        }
+        .avatar-upload-box:hover { border-color: var(--bright-teal-blue); background: rgba(0, 119, 182, 0.05); }
+        .avatar-upload-box i { font-size: 3.5rem; color: #9ca3af; }
+        .avatar-upload-box img {
+            width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;
+        }
+
+        /* دکمه اکسل */
+        .btn-excel { background-color: #1D6F42; color: white; border: none; }
+        .btn-excel:hover { color: white; background-color: #155a33; }
+
+        /* جدول */
+        .table-custom th { color: #6b7280; border-bottom: 2px solid var(--bright-teal-blue); text-align: center; }
+        .table-custom td { vertical-align: middle; border-bottom: 1px solid #f3f4f6; text-align: center; }
+        .table-custom tbody tr:hover { background-color: rgba(0, 119, 182, 0.05); }
+        .avatar-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
+        .status-badge { padding: 4px 12px; border-radius: 50px; font-size: 11px; font-weight: 600; }
+        .status-badge.active { background: #d1fae5; color: #059669; }
+        .status-badge.leave { background: #fef3c7; color: #d97706; }
+
+        /* ========================================================== */
+        /* ★★★ RIPPLE EFFECT CSS ★★★ */
+        /* ========================================================== */
+        .ripple-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .ripple-btn:active {
+            transform: scale(0.96);
+        }
+        .ripple-effect {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.7);
+            transform: scale(0);
+            animation: ripple-animation 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            pointer-events: none;
+        }
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .app-layout { display: block; }
+            .sidebar { position: fixed; top: 0; right: -260px; width: 260px; height: 100vh; z-index: 1050; padding: 20px 15px; transition: right 0.3s ease; }
+            .app-layout.sidebar-open .sidebar { right: 0; width: 260px; }
+            .main-content-wrapper { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-layout" id="appLayout">
+
+    <!-- سایدبار کامل -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-info">
+                <i class="fas fa-layer-group"></i>
+                <div class="sidebar-brand-text">
+                    <h5>سامانه معاونت فاوا</h5>
+                    <small>دانشگاه علوم پزشکی</small>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav flex-column">
+            <!-- صفحه اصلی -->
+            <li class="nav-item">
+                <a class="nav-link" href="../index.html">
+                    <i class="fas fa-home"></i> <span class="link-text">صفحه اصلی</span>
+                </a>
+            </li>
+
+            <!-- منابع انسانی -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle show" href="#" data-bs-toggle="collapse" data-bs-target="#hrSubmenu" aria-expanded="true">
+                    <i class="fas fa-users"></i> <span class="link-text">منابع انسانی</span>
+                </a>
+                <ul class="submenu collapse show" id="hrSubmenu">
+                    <li><a class="nav-link active" href="personnel.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست پرسنل</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">حضور و غیاب</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">ارزیابی عملکرد</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">افزودن پرسنل جدید</span></a></li>
+                </ul>
+            </li>
+
+            <!-- شرکت‌ها -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#companiesSubmenu" aria-expanded="false">
+                    <i class="fas fa-building"></i> <span class="link-text">شرکت‌ها</span>
+                </a>
+                <ul class="submenu collapse" id="companiesSubmenu">
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست شرکت‌ها</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">درخواست‌های همکاری</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">تاریخچه قراردادها</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">ثبت شرکت جدید</span></a></li>
+                </ul>
+            </li>
+
+            <!-- قراردادها -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#contractsSubmenu" aria-expanded="false">
+                    <i class="fas fa-file-signature"></i> <span class="link-text">قراردادها</span>
+                </a>
+                <ul class="submenu collapse" id="contractsSubmenu">
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">قراردادهای فعال</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">صدور قرارداد جدید</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">پایان قراردادها</span></a></li>
+                </ul>
+            </li>
+
+            <!-- پروژه‌ها -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#projectsSubmenu" aria-expanded="false">
+                    <i class="fas fa-folder-open"></i> <span class="link-text">پروژه‌ها</span>
+                </a>
+                <ul class="submenu collapse" id="projectsSubmenu">
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">پروژه‌های جاری</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">پروژه‌های خاتمه یافته</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">گزارش پیشرفت</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">افزودن پروژه جدید</span></a></li>
+                </ul>
+            </li>
+
+            <!-- سامانه‌ها -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#systemsSubmenu" aria-expanded="false">
+                    <i class="fas fa-laptop"></i> <span class="link-text">سامانه‌ها</span>
+                </a>
+                <ul class="submenu collapse" id="systemsSubmenu">
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">سامانه جامع پرسنلی</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">سامانه اتوماسیون اداری</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">سامانه مدیریت آموزش</span></a></li>
+                </ul>
+            </li>
+
+            <!-- برنامه و بودجه -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#budgetSubmenu" aria-expanded="false">
+                    <i class="fas fa-chart-line"></i> <span class="link-text">برنامه و بودجه</span>
+                </a>
+                <ul class="submenu collapse" id="budgetSubmenu">
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">بودجه سالانه</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">هزینه‌های جاری</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">گزارش مالی</span></a></li>
+                </ul>
+            </li>
+
+            <!-- تنظیمات -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#settingsSubmenu" aria-expanded="false">
+                    <i class="fas fa-cog"></i> <span class="link-text">تنظیمات</span>
+                </a>
+                <ul class="submenu collapse" id="settingsSubmenu">
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">پروفایل کاربری</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">تنظیمات عمومی</span></a></li>
+                    <li><a class="nav-link" href="#"><i class="fas fa-chevron-left"></i> <span class="link-text">مدیریت دسترسی‌ها</span></a></li>
+                </ul>
+            </li>
+
+            <li class="nav-item mt-4">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-headset"></i> <span class="link-text">پشتیبانی</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- محتوا -->
+    <div class="main-content-wrapper" id="mainContent">
+        <header class="topbar">
+            <div class="topbar-date-row">
+                <span><i class="far fa-calendar-alt me-1"></i> ۵ خرداد ۱۴۰۳</span>
+                <small>۲۵ ذی القعده ۱۴۴۵</small>
+            </div>
+            <div class="topbar-main-row">
+                <div class="topbar-title-right">
+                    <button class="topbar-toggle-btn ripple-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                    <div>
+                        <h5>مدیریت لیست پرسنل</h5>
+                        <small>ثبت و ویرایش اطلاعات جامع پرسنل</small>
+                    </div>
+                </div>
+                <div class="user-profile">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="far fa-bell text-muted" style="font-size: 18px;"></i>
+                        <i class="far fa-envelope text-muted" style="font-size: 18px;"></i>
+                    </div>
+                    <div class="info">
+                        <h6>فهیمه جم</h6>
+                        <small>مدیر سیستم</small>
+                    </div>
+                    <img src="https://ui-avatars.com/api/?name=Fahimeh+Jam&background=0077b6&color=fff" alt="User">
+                </div>
+            </div>
+        </header>
+
+        <!-- ================= فرم ثبت پرسنل ================= -->
+        <div class="section-card">
+            <div class="section-header">
+                <h5><i class="fas fa-user-edit me-2" style="color:var(--bright-teal-blue)"></i>فرم ثبت و ویرایش اطلاعات پرسنل</h5>
+                <button class="btn btn-outline-primary btn-sm ripple-btn"><i class="fas fa-pen"></i> ویرایش</button>
+            </div>
+
+            <form>
+                <!-- ردیف اول: تصویر (3 ستون) + فیلدهای اولیه -->
+                <div class="row g-4 mb-4">
+
+                    <!-- ستون تصویر (دقیقاً 3 ستون) -->
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">تصویر پرسنلی</label>
+                        <div class="avatar-upload-box" id="avatarBox" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-user-circle" id="defaultIcon"></i>
+                            <small class="text-muted mt-2" id="uploadText">آپلود عکس</small>
+                            <input type="file" id="fileInput" class="d-none" accept="image/*" onchange="previewImage(event)">
+                        </div>
+                    </div>
+
+                    <!-- 9 ستون باقی‌مانده برای فیلدهای ردیف اول -->
+                    <div class="col-md-9">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">نام <span class="required-star">*</span></label>
+                                <input type="text" class="form-control" placeholder="نام" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">نام خانوادگی <span class="required-star">*</span></label>
+                                <input type="text" class="form-control" placeholder="نام خانوادگی" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">کد ملی <span class="required-star">*</span></label>
+                                <input type="text" class="form-control" placeholder="کد ملی" required>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">تاریخ تولد <span class="required-star">*</span></label>
+                                <!-- ★★★ فیلد تاریخ با کلاس datepicker-here برای فعال‌سازی تقویم شمسی ★★★ -->
+                                <input type="text" class="form-control datepicker-here" placeholder="تاریخ تولد (شمسی)" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">شماره شناسنامه <span class="required-star">*</span></label>
+                                <input type="text" class="form-control" placeholder="شماره شناسنامه" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ردیف‌های بعدی: بقیه فیلدها (به صورت 3 ستونه) -->
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label">مدرک تحصیلی</label>
+                        <select class="form-select">
+                            <option>انتخاب کنید</option>
+                            <option>دیپلم</option>
+                            <option>فوق دیپلم</option>
+                            <option>لیسانس</option>
+                            <option>فوق لیسانس</option>
+                            <option>دکتری</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">وضعیت تاهل</label>
+                        <select class="form-select" id="maritalStatus">
+                            <option value="مجرد">مجرد</option>
+                            <option value="متاهل">متاهل</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">تعداد فرزندان</label>
+                        <input type="number" class="form-control" id="childCount" placeholder="تعداد" min="0" disabled>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">شماره موبایل <span class="required-star">*</span></label>
+                        <input type="text" class="form-control" placeholder="شماره موبایل" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">شماره تماس اضطراری ۱ <span class="required-star">*</span></label>
+                        <input type="text" class="form-control" placeholder="تماس اضطراری ۱" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">شماره تماس اضطراری ۲</label>
+                        <input type="text" class="form-control" placeholder="تماس اضطراری ۲">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">نوع عضویت</label>
+                        <select class="form-select">
+                            <option>رسمی</option>
+                            <option>پیمانی</option>
+                            <option>قراردادی</option>
+                            <option>پروژه‌ای</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">شناسه پاسداری</label>
+                        <input type="text" class="form-control" placeholder="شناسه پاسداری">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">درجه نظامی</label>
+                        <input type="text" class="form-control" placeholder="درجه نظامی">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">جایگاه نظامی</label>
+                        <input type="text" class="form-control" placeholder="جایگاه نظامی">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">مرکز محل خدمت</label>
+                        <input type="text" class="form-control" placeholder="مرکز محل خدمت">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">معاونت محل خدمت</label>
+                        <input type="text" class="form-control" placeholder="معاونت محل خدمت">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">بخش محل خدمت</label>
+                        <input type="text" class="form-control" placeholder="بخش محل خدمت">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">سمت شغلی <span class="required-star">*</span></label>
+                        <input type="text" class="form-control" placeholder="سمت شغلی" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">شماره کارت ساعت‌زنی</label>
+                        <input type="text" class="form-control" placeholder="شماره کارت">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">تاریخ شروع به کار</label>
+                        <input type="text" class="form-control datepicker-here" placeholder="تاریخ شروع (شمسی)">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">تاریخ پایان کار</label>
+                        <input type="text" class="form-control datepicker-here" placeholder="تاریخ پایان (شمسی)">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">مبلغ ساعت اضافه کار</label>
+                        <input type="text" class="form-control" placeholder="مبلغ به ریال">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">توضیحات</label>
+                        <textarea class="form-control" rows="3" placeholder="سایر توضیحات لازم..."></textarea>
+                    </div>
+
+                </div>
+
+                <!-- دکمه‌های پایین فرم -->
+                <div class="mt-4 border-top pt-3 d-flex gap-3">
+                    <button type="submit" class="btn btn-primary ripple-btn"><i class="fas fa-save me-1"></i> ثبت نهایی</button>
+                    <button type="reset" class="btn btn-secondary ripple-btn"><i class="fas fa-times me-1"></i> انصراف</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ================= لیست پرسنل و دکمه اکسل ================= -->
+        <div class="section-card">
+            <div class="section-header">
+                <h5><i class="fas fa-list-ul me-2" style="color:var(--bright-teal-blue)"></i>لیست پرسنل ثبت شده</h5>
+                <button class="btn btn-excel btn-sm px-3 ripple-btn"><i class="fas fa-file-excel me-1"></i> خروجی اکسل</button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>تصویر</th>
+                        <th>نام و نام خانوادگی</th>
+                        <th>کد ملی</th>
+                        <th>سمت شغلی</th>
+                        <th>محل خدمت</th>
+                        <th>وضعیت</th>
+                        <th>عملیات</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td><img src="https://ui-avatars.com/api/?name=Hossein+Abbasi&background=0077b6&color=fff" class="avatar-img" alt="User"></td>
+                        <td class="fw-bold">حسین عظیمی</td>
+                        <td>۲۵۸۶۳۳۹</td>
+                        <td>کارشناس فناوری اطلاعات</td>
+                        <td>معاونت فاوا</td>
+                        <td><span class="status-badge active">فعال</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-warning ripple-btn"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-outline-danger ripple-btn"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td><img src="https://ui-avatars.com/api/?name=Mehdi+Haji&background=00b4d8&color=fff" class="avatar-img" alt="User"></td>
+                        <td class="fw-bold">مهدی حاجی اسداللهی</td>
+                        <td>۲۵۶۵۴۲۲</td>
+                        <td>مدیر بخش هماهنگی</td>
+                        <td>ستاد</td>
+                        <td><span class="status-badge leave">مرخصی</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-warning ripple-btn"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-outline-danger ripple-btn"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== اسکریپت‌ها ===== -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script>
+    // ==========================================
+    // 1. توابع سایدبار
+    // ==========================================
+    function toggleSidebar() {
+        const layout = document.getElementById('appLayout');
+        const isOpening = !layout.classList.contains('sidebar-open');
+
+        layout.classList.toggle('sidebar-open');
+
+        if (!isOpening) {
+            const openSubmenus = document.querySelectorAll('.submenu.collapse.show');
+            openSubmenus.forEach(submenu => {
+                const bsCollapse = bootstrap.Collapse.getInstance(submenu);
+                if (bsCollapse) {
+                    bsCollapse.hide();
+                } else {
+                    const newCollapse = new bootstrap.Collapse(submenu, { toggle: false });
+                    newCollapse.hide();
+                }
+            });
+        }
+    }
+
+    // ==========================================
+    // 2. آپلود عکس
+    // ==========================================
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const box = document.getElementById('avatarBox');
+                const icon = document.getElementById('defaultIcon');
+                const text = document.getElementById('uploadText');
+
+                if(icon) icon.style.display = 'none';
+                if(text) text.style.display = 'none';
+
+                const existingImg = box.querySelector('img');
+                if(existingImg) existingImg.remove();
+
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = "پیش‌نمایش پرسنل";
+                box.appendChild(img);
+                box.style.border = "2px solid #0077b6";
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // ==========================================
+    // 3. شرط فعال‌سازی تعداد فرزندان
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const maritalSelect = document.getElementById('maritalStatus');
+        const childCountInput = document.getElementById('childCount');
+
+        function toggleChildrenField() {
+            if (maritalSelect.value === 'متاهل') {
+                childCountInput.removeAttribute('disabled');
+                childCountInput.focus();
+            } else {
+                childCountInput.setAttribute('disabled', 'disabled');
+                childCountInput.value = '';
+            }
+        }
+        toggleChildrenField();
+        maritalSelect.addEventListener('change', toggleChildrenField);
+    });
+
+    // ==========================================
+    // 4. ★★★ فعال‌سازی تقویم شمسی با کتابخانه npm-persian-datepicker ★★★
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // اعمال تقویم روی تمام فیلدهای دارای کلاس datepicker-here
+        $('.datepicker-here').persianDatepicker({
+            format: 'YYYY/MM/DD', // فرمت خروجی
+            autoClose: true,      // بستن خودکار پس از انتخاب
+            observer: true,       // واکنش به تغییرات داینامیک
+            selectedBefore: false
+        });
+    });
+
+
+    // ==========================================
+    // 5. RIPPLE EFFECT
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const rippleBtns = document.querySelectorAll('.ripple-btn');
+
+        if (rippleBtns.length > 0) {
+            rippleBtns.forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    const existingRipple = this.querySelector('.ripple-effect');
+                    if (existingRipple) {
+                        existingRipple.remove();
+                    }
+
+                    const rect = this.getBoundingClientRect();
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple-effect');
+
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    const size = Math.max(rect.width, rect.height);
+
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = (x - size / 2) + 'px';
+                    ripple.style.top = (y - size / 2) + 'px';
+
+                    this.appendChild(ripple);
+                });
+            });
+        }
+    });
+</script>
+
+<!-- اسکریپت تاریخ شمسی-->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+
+</body>
+</html>
