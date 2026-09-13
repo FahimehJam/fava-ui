@@ -1,10 +1,555 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه فاوا - لیست پروژه‌های در حال اجرا</title>
+
+    <!-- Bootstrap 5 RTL CSS -->
+    <link rel="stylesheet" href="css/bootstrap.rtl.min.css">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="css/all.min.css">
+
+    <!-- ★★★ فونت Vazirmatn (نسخه استاندارد و گرد) ★★★ -->
+    <link href="css/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-$END$
+
+<div class="app-layout" id="appLayout">
+
+    <!-- سایدبار کامل -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-info">
+                <img src="images/bmsu.png" alt="لوگو" style="width: 40px; height: 40px; object-fit: contain; margin-left: 10px; min-width: 40px;">
+                <div class="sidebar-brand-text">
+                    <h5>سامانه معاونت فاوا</h5>
+                    <small>دانشگاه علوم پزشکی بقیه الله(عج)</small>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav flex-column">
+            <!-- صفحه اصلی -->
+            <li class="nav-item">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-home"></i> <span class="link-text">صفحه اصلی</span>
+                </a>
+            </li>
+
+            <!-- اطلاعات پایه -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#baseSubmenu" aria-expanded="false">
+                    <i class="fas fa-database"></i> <span class="link-text">اطلاعات پایه</span>
+                </a>
+                <ul class="submenu collapse" id="baseSubmenu">
+                    <li><a class="nav-link" href="center_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست مراکز</span></a></li>
+                    <li><a class="nav-link" href="deputy_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست معاونت‌ها</span></a></li>
+                    <li><a class="nav-link" href="section_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست بخش‌ها</span></a></li>
+                    <li><a class="nav-link" href="physical_location_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست محل‌های فیزیکی</span></a></li>
+                    <li><a class="nav-link" href="equipment_type_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست نوع تجهیزات</span></a></li>
+                    <li><a class="nav-link" href="equipment_model_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست مدل تجهیزات</span></a></li>
+                    <li><a class="nav-link" href="network_type_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست انواع شبکه</span></a></li>
+                    <li><a class="nav-link" href="measurement_unit_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">واحدهای اندازه‌گیری</span></a></li>
+                    <li><a class="nav-link" href="product_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست کالا</span></a></li>
+                </ul>
+            </li>
+
+            <!-- منابع انسانی -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#hrSubmenu" aria-expanded="false">
+                    <i class="fas fa-users"></i> <span class="link-text">منابع انسانی</span>
+                </a>
+                <ul class="submenu collapse" id="hrSubmenu">
+                    <li><a class="nav-link" href="personnel.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست پرسنل</span></a></li>
+                </ul>
+            </li>
+
+            <!-- شرکت‌ها -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#companiesSubmenu" aria-expanded="false">
+                    <i class="fas fa-building"></i> <span class="link-text">شرکت‌ها</span>
+                </a>
+                <ul class="submenu collapse" id="companiesSubmenu">
+                    <li><a class="nav-link" href="company.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست شرکت‌ها</span></a></li>
+                </ul>
+            </li>
+
+            <!-- قراردادها -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#contractsSubmenu" aria-expanded="false">
+                    <i class="fas fa-file-signature"></i> <span class="link-text">قراردادها</span>
+                </a>
+                <ul class="submenu collapse" id="contractsSubmenu">
+                    <li><a class="nav-link" href="contract.html"><i class="fas fa-chevron-left"></i> <span class="link-text">صدور قرارداد جدید</span></a></li>
+                </ul>
+            </li>
+
+            <!-- پروژه‌ها (این منو فعال شده است) -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle " href="#" data-bs-toggle="collapse" data-bs-target="#projectSubmenu" aria-expanded="true">
+                    <i class="fas fa-folder-open"></i> <span class="link-text">پروژه‌ها</span>
+                </a>
+                <ul class="submenu collapse show" id="projectSubmenu">
+                    <li><a class="nav-link active" href="projects_running.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست پروژه‌های در حال اجرا</span></a></li>
+                    <li><a class="nav-link" href="forms/project.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست پروژه‌ها</span></a></li>
+                </ul>
+            </li>
+
+            <!-- سامانه‌ها -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#systemSubmenu" aria-expanded="false">
+                    <i class="fas fa-laptop"></i> <span class="link-text">سامانه‌ها</span>
+                </a>
+                <ul class="submenu collapse" id="systemSubmenu">
+                    <li><a class="nav-link" href="system.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست سامانه‌ها</span></a></li>
+                </ul>
+            </li>
+
+            <!-- تجهیزات -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#equipSubmenu" aria-expanded="false">
+                    <i class="fas fa-microchip"></i> <span class="link-text">تجهیزات</span>
+                </a>
+                <ul class="submenu collapse" id="equipSubmenu">
+                    <li><a class="nav-link" href="net_equipment.html"><i class="fas fa-chevron-left"></i> <span class="link-text">تجهیزات شبکه محور</span></a></li>
+                    <li><a class="nav-link" href="user_equipment.html"><i class="fas fa-chevron-left"></i> <span class="link-text">تجهیزات کاربر محور</span></a></li>
+                </ul>
+            </li>
+
+            <!-- برنامه و بودجه -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#budgetSubmenu" aria-expanded="false">
+                    <i class="fas fa-chart-line"></i> <span class="link-text">برنامه و بودجه</span>
+                </a>
+                <ul class="submenu collapse" id="budgetSubmenu">
+                    <li><a class="nav-link" href="budget_program.html"><i class="fas fa-chevron-left"></i> <span class="link-text">عنوان برنامه سالانه</span></a></li>
+                    <li><a class="nav-link" href="plan_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست برنامه</span></a></li>
+                    <li><a class="nav-link" href="activity_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست فعالیت</span></a></li>
+                    <li><a class="nav-link" href="budget_row.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست ردیف بودجه</span></a></li>
+                    <li><a class="nav-link" href="allocation_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست تخصیص</span></a></li>
+                    <li><a class="nav-link" href="activity_allocation.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست تخصیص فعالیت</span></a></li>
+                    <li><a class="nav-link" href="invoice_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست فاکتورها</span></a></li>
+                </ul>
+            </li>
+
+            <!-- تنظیمات -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#settingSubmenu" aria-expanded="false">
+                    <i class="fas fa-cog"></i> <span class="link-text">تنظیمات</span>
+                </a>
+                <ul class="submenu collapse" id="settingSubmenu">
+                    <li><a class="nav-link" href="user_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست کاربران</span></a></li>
+                    <li><a class="nav-link" href="role_list.html"><i class="fas fa-chevron-left"></i> <span class="link-text">لیست نقش‌ها</span></a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- محتوا -->
+    <div class="main-content-wrapper" id="mainContent">
+        <header class="topbar">
+            <div class="topbar-date-row">
+                <span><i class="far fa-calendar-alt me-1"></i> ۵ خرداد ۱۴۰۳</span>
+                <small>۲۵ ذوالقعده ۱۴۴۵</small>
+            </div>
+            <div class="topbar-main-row">
+                <div class="topbar-title-right">
+                    <button class="topbar-toggle-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                    <div>
+                        <h5>لیست پروژه‌های در حال اجرا</h5>
+                        <small>مشاهده و مدیریت پروژه‌های فعال</small>
+                    </div>
+                </div>
+                <div class="user-profile">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="far fa-bell text-muted" style="font-size: 18px;"></i>
+                        <i class="far fa-envelope text-muted" style="font-size: 18px;"></i>
+                    </div>
+                    <div class="info">
+                        <h6>کابرتستی</h6>
+                        <small>مدیر سیستم</small>
+                    </div>
+                    <img src="https://ui-avatars.com/api/?name=Fahimeh+Jam&background=0077b6&color=fff" alt="User">
+                </div>
+            </div>
+        </header>
+
+        <!-- ================= لیست پروژه‌ها ================= -->
+        <div class="container-fluid px-0">
+
+            <!-- فیلترها -->
+            <div class="filter-section" id="filterSection">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">وضعیت</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="all">همه</option>
+                            <option value="در حال اجرا">در حال اجرا</option>
+                            <option value="در انتظار">در انتظار</option>
+                            <option value="تکمیل شده">تکمیل شده</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">تیم</label>
+                        <select class="form-select" id="teamFilter">
+                            <option value="all">همه تیم‌ها</option>
+                            <option value="پرتویان رایانه">پرتویان رایانه</option>
+                            <option value="فناوران عصر جدید">فناوران عصر جدید</option>
+                            <option value="تیم داخلی فاوا">تیم داخلی فاوا</option>
+                            <option value="تابان دانش">تابان دانش</option>
+                            <option value="تیم امنیت">تیم امنیت</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">جستجو</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="searchInput" placeholder="نام پروژه را وارد کنید...">
+                            <button class="btn btn-primary" id="searchBtn"><i class="fas fa-search"></i> جستجو</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ★★★ شبکه کارت‌های پروژه ★★★ -->
+            <div class="row g-4" id="projectCardsContainer">
+
+                <!-- کارت ۱ -->
+                <div class="col-xl-3 col-lg-4 col-md-6 project-card-wrapper" data-status="در حال اجرا" data-team="پرتویان رایانه" data-title="پورتال کارمندان">
+                    <div class="project-card purple">
+                        <div>
+                            <div class="header">
+                                <div class="project-icon bg-purple"><i class="fas fa-users"></i></div>
+                                <span class="status-badge-custom in-progress">در حال اجرا</span>
+                            </div>
+                            <div class="title">پورتال کارمندان</div>
+                            <div class="subtitle"><i class="fas fa-building me-1"></i> پرتویان رایانه</div>
+
+                            <div class="stats">
+                                <div class="stat-item"><i class="fas fa-file-alt me-1"></i> <span>۱۲</span> فایل</div>
+                                <div class="stat-item"><i class="fas fa-folder me-1"></i> <span>۲۰</span> فولدر</div>
+                            </div>
+
+                            <div class="dates">
+                                <div class="date-item"><i class="far fa-calendar-alt me-1"></i> شروع: ۱۴۰۳/۰۲/۱۰</div>
+                                <div class="date-item"><i class="far fa-clock me-1"></i> پایان: ۱۴۰۳/۰۴/۲۰</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="team">
+                                <div class="avatars">
+                                    <img src="https://ui-avatars.com/api/?name=Ali&background=8b5cf6&color=fff">
+                                    <img src="https://ui-avatars.com/api/?name=Sara&background=3b82f6&color=fff">
+                                    <img src="https://ui-avatars.com/api/?name=Mehdi&background=14b8a6&color=fff">
+                                    <img src="https://ui-avatars.com/api/?name=Hossein&background=f59e0b&color=fff">
+                                </div>
+                                <span class="team-count">+۵ نفر</span>
+                            </div>
+
+                            <div class="progress-wrapper">
+                                <div class="progress-bar-custom">
+                                    <div class="fill purple" style="width: 65%;"></div>
+                                </div>
+                                <span class="progress-text">۶۵%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- کارت ۲ -->
+                <div class="col-xl-3 col-lg-4 col-md-6 project-card-wrapper" data-status="در حال اجرا" data-team="فناوران عصر جدید" data-title="اپلیکیشن موبایل">
+                    <div class="project-card blue">
+                        <div>
+                            <div class="header">
+                                <div class="project-icon bg-blue"><i class="fas fa-shopping-cart"></i></div>
+                                <span class="status-badge-custom in-progress">در حال اجرا</span>
+                            </div>
+                            <div class="title">اپلیکیشن موبایل</div>
+                            <div class="subtitle"><i class="fas fa-building me-1"></i> فناوران عصر جدید</div>
+
+                            <div class="stats">
+                                <div class="stat-item"><i class="fas fa-file-alt me-1"></i> <span>۲۱</span> فایل</div>
+                                <div class="stat-item"><i class="fas fa-folder me-1"></i> <span>۳۳</span> فولدر</div>
+                            </div>
+
+                            <div class="dates">
+                                <div class="date-item"><i class="far fa-calendar-alt me-1"></i> شروع: ۱۴۰۳/۰۱/۲۰</div>
+                                <div class="date-item"><i class="far fa-clock me-1"></i> پایان: ۱۴۰۳/۰۳/۱۵</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="team">
+                                <div class="avatars">
+                                    <img src="https://ui-avatars.com/api/?name=Reza&background=0077b6&color=fff">
+                                    <img src="https://ui-avatars.com/api/?name=Zahra&background=00b4d8&color=fff">
+                                    <img src="https://ui-avatars.com/api/?name=Ali&background=90e0ef&color=03045e">
+                                </div>
+                                <span class="team-count">+۳ نفر</span>
+                            </div>
+
+                            <div class="progress-wrapper">
+                                <div class="progress-bar-custom">
+                                    <div class="fill blue" style="width: 78%;"></div>
+                                </div>
+                                <span class="progress-text">۷۸%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- کارت ۳ -->
+                <div class="col-xl-3 col-lg-4 col-md-6 project-card-wrapper" data-status="در انتظار" data-team="تیم داخلی فاوا" data-title="داشبورد مدیریت">
+                    <div class="project-card teal">
+                        <div>
+                            <div class="header">
+                                <div class="project-icon bg-teal"><i class="fas fa-chart-pie"></i></div>
+                                <span class="status-badge-custom pending">در انتظار</span>
+                            </div>
+                            <div class="title">داشبورد مدیریت</div>
+                            <div class="subtitle"><i class="fas fa-building me-1"></i> تیم داخلی فاوا</div>
+
+                            <div class="stats">
+                                <div class="stat-item"><i class="fas fa-file-alt me-1"></i> <span>۸</span> فایل</div>
+                                <div class="stat-item"><i class="fas fa-folder me-1"></i> <span>۱۵</span> فولدر</div>
+                            </div>
+
+                            <div class="dates">
+                                <div class="date-item"><i class="far fa-calendar-alt me-1"></i> شروع: ۱۴۰۳/۰۳/۰۱</div>
+                                <div class="date-item"><i class="far fa-clock me-1"></i> پایان: ۱۴۰۳/۰۴/۱۰</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="team">
+                                <div class="avatars">
+                                    <img src="https://ui-avatars.com/api/?name=Fahimeh&background=14b8a6&color=fff">
+                                    <img src="https://ui-avatars.com/api/?name=Amir&background=2dd4bf&color=fff">
+                                </div>
+                                <span class="team-count">+۲ نفر</span>
+                            </div>
+
+                            <div class="progress-wrapper">
+                                <div class="progress-bar-custom">
+                                    <div class="fill teal" style="width: 40%;"></div>
+                                </div>
+                                <span class="progress-text">۴۰%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- کارت ۴ -->
+                <div class="col-xl-3 col-lg-4 col-md-6 project-card-wrapper" data-status="در حال اجرا" data-team="تیم داخلی فاوا" data-title="اتوماسیون اداری">
+                    <div class="project-card orange">
+                        <div>
+                            <div class="header">
+                                <div class="project-icon bg-orange"><i class="fas fa-cogs"></i></div>
+                                <span class="status-badge-custom in-progress">در حال اجرا</span>
+                            </div>
+                            <div class="title">اتوماسیون اداری</div>
+                            <div class="subtitle"><i class="fas fa-building me-1"></i> تیم داخلی فاوا</div>
+
+                            <div class="stats">
+                                <div class="stat-item"><i class="fas fa-file-alt me-1"></i> <span>۳۵</span> فایل</div>
+                                <div class="stat-item"><i class="fas fa-folder me-1"></i> <span>۴۰</span> فولدر</div>
+                            </div>
+
+                            <div class="dates">
+                                <div class="date-item"><i class="far fa-calendar-alt me-1"></i> شروع: ۱۴۰۳/۰۲/۰۵</div>
+                                <div class="date-item"><i class="far fa-clock me-1"></i> پایان: ۱۴۰۳/۰۵/۲۰</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="team">
+                                <div class="avatars">
+                                    <img src="https://ui-avatars.com/api/?name=Hossein&background=f59e0b&color=fff">
+                                    <img src="https://ui-avatars.com/api/?name=Sina&background=fbbf24&color=fff">
+                                    <img src="https://ui-avatars.com/api/?name=Mahdi&background=8b5cf6&color=fff">
+                                </div>
+                                <span class="team-count">+۳ نفر</span>
+                            </div>
+
+                            <div class="progress-wrapper">
+                                <div class="progress-bar-custom">
+                                    <div class="fill orange" style="width: 90%;"></div>
+                                </div>
+                                <span class="progress-text">۹۰%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- کارت ۵ -->
+                <div class="col-xl-3 col-lg-4 col-md-6 project-card-wrapper" data-status="تکمیل شده" data-team="تابان دانش" data-title="سامانه آموزش">
+                    <div class="project-card green">
+                        <div>
+                            <div class="header">
+                                <div class="project-icon bg-green"><i class="fas fa-graduation-cap"></i></div>
+                                <span class="status-badge-custom done">تکمیل شده</span>
+                            </div>
+                            <div class="title">سامانه آموزش</div>
+                            <div class="subtitle"><i class="fas fa-building me-1"></i> تابان دانش</div>
+
+                            <div class="stats">
+                                <div class="stat-item"><i class="fas fa-file-alt me-1"></i> <span>۱۴</span> فایل</div>
+                                <div class="stat-item"><i class="fas fa-folder me-1"></i> <span>۲۸</span> فولدر</div>
+                            </div>
+
+                            <div class="dates">
+                                <div class="date-item"><i class="far fa-calendar-alt me-1"></i> شروع: ۱۴۰۳/۰۱/۱۰</div>
+                                <div class="date-item"><i class="far fa-clock me-1"></i> پایان: ۱۴۰۳/۰۲/۳۰</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="team">
+                                <div class="avatars">
+                                    <img src="https://ui-avatars.com/api/?name=Navid&background=10b981&color=fff">
+                                    <img src="https://ui-avatars.com/api/?name=Mina&background=34d399&color=fff">
+                                </div>
+                                <span class="team-count">+۲ نفر</span>
+                            </div>
+
+                            <div class="progress-wrapper">
+                                <div class="progress-bar-custom">
+                                    <div class="fill green" style="width: 100%;"></div>
+                                </div>
+                                <span class="progress-text">۱۰۰%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- کارت ۶ -->
+                <div class="col-xl-3 col-lg-4 col-md-6 project-card-wrapper" data-status="در انتظار" data-team="تیم امنیت" data-title="رفع باگ‌های امنیتی">
+                    <div class="project-card red">
+                        <div>
+                            <div class="header">
+                                <div class="project-icon bg-red"><i class="fas fa-exclamation-triangle"></i></div>
+                                <span class="status-badge-custom pending">در انتظار</span>
+                            </div>
+                            <div class="title">رفع باگ‌های امنیتی</div>
+                            <div class="subtitle"><i class="fas fa-building me-1"></i> تیم امنیت</div>
+
+                            <div class="stats">
+                                <div class="stat-item"><i class="fas fa-file-alt me-1"></i> <span>۶</span> فایل</div>
+                                <div class="stat-item"><i class="fas fa-folder me-1"></i> <span>۵</span> فولدر</div>
+                            </div>
+
+                            <div class="dates">
+                                <div class="date-item"><i class="far fa-calendar-alt me-1"></i> شروع: ۱۴۰۳/۰۳/۱۵</div>
+                                <div class="date-item"><i class="far fa-clock me-1"></i> پایان: ۱۴۰۳/۰۴/۰۱</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="team">
+                                <div class="avatars">
+                                    <img src="https://ui-avatars.com/api/?name=Kaveh&background=ef4444&color=fff">
+                                    <img src="https://ui-avatars.com/api/?name=Shadi&background=f87171&color=fff">
+                                </div>
+                                <span class="team-count">+۲ نفر</span>
+                            </div>
+
+                            <div class="progress-wrapper">
+                                <div class="progress-bar-custom">
+                                    <div class="fill red" style="width: 15%;"></div>
+                                </div>
+                                <span class="progress-text">۱۵%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- صفحه‌بندی -->
+            <div class="d-flex justify-content-center mt-5">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination pagination-custom">
+                        <li class="page-item"><a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a></li>
+                        <li class="page-item"><a class="page-link" href="#">۱</a></li>
+                        <li class="page-item"><a class="page-link active" href="#">۲</a></li>
+                        <li class="page-item"><a class="page-link" href="#">۳</a></li>
+                        <li class="page-item"><a class="page-link" href="#"><i class="fas fa-chevron-left"></i></a></li>
+                    </ul>
+                </nav>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="js/bootstrap.bundle.min.js"></script>
+<script>
+    // ==========================================
+    // 1. توابع سایدبار
+    // ==========================================
+    function toggleSidebar() {
+        const layout = document.getElementById('appLayout');
+        layout.classList.toggle('sidebar-open');
+    }
+
+    // ==========================================
+    // 2. سیستم فیلتر و جستجوی پیشرفته
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // دریافت عناصر
+        const statusFilter = document.getElementById('statusFilter');
+        const teamFilter = document.getElementById('teamFilter');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const cards = document.querySelectorAll('.project-card-wrapper');
+
+        // تابع فیلتر کردن
+        function filterProjects() {
+            const statusValue = statusFilter.value;
+            const teamValue = teamFilter.value;
+            const searchText = searchInput.value.trim().toLowerCase();
+
+            cards.forEach(card => {
+                const cardStatus = card.getAttribute('data-status');
+                const cardTeam = card.getAttribute('data-team');
+                const cardTitle = card.getAttribute('data-title').toLowerCase();
+
+                // شرط وضعیت
+                const statusMatch = (statusValue === 'all') || (cardStatus === statusValue);
+
+                // شرط تیم
+                const teamMatch = (teamValue === 'all') || (cardTeam === teamValue);
+
+                // شرط جستجو (نام پروژه)
+                const searchMatch = (searchText === '') || (cardTitle.includes(searchText));
+
+                // نمایش یا مخفی کردن کارت
+                if (statusMatch && teamMatch && searchMatch) {
+                    card.style.display = ''; // نمایش
+                } else {
+                    card.style.display = 'none'; // مخفی
+                }
+            });
+        }
+
+        // رویدادها
+        statusFilter.addEventListener('change', filterProjects);
+        teamFilter.addEventListener('change', filterProjects);
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                filterProjects();
+            }
+        });
+        searchBtn.addEventListener('click', filterProjects);
+
+        // اجرای اولیه
+        filterProjects();
+    });
+</script>
+
 </body>
 </html>
